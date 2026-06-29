@@ -1,11 +1,12 @@
 #pragma once
 
 #include <cstdio>
-#include <cstdlib>
 
-/// OpenGL error-checking wrapper. Calls glGetError() and prints to stderr on failure.
-/// Usage: GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, vbo));
-#ifdef DEBUG
+// OpenGL debugging macro. Requires <glad/gl.h> to be included BEFORE this macro.
+// Usage: GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, vbo));
+#ifdef NDEBUG
+#define GL_CALL(cmd) cmd
+#else
 #define GL_CALL(cmd) \
     do { \
         cmd; \
@@ -15,6 +16,4 @@
                          err, __FILE__, __LINE__, #cmd); \
         } \
     } while (0)
-#else
-#define GL_CALL(cmd) cmd
 #endif

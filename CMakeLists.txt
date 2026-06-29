@@ -10,10 +10,7 @@ add_library(exd-core STATIC
     # ECS
     src/ecs/registry.cpp
 
-    # Math (header-only with inline functions, but keep .cpp for ODR)
-    src/math/vec3.cpp
-
-    # Foundation stubs (placeholder implementations)
+    # Foundation
     src/core/config.cpp
     src/core/logging.cpp
     src/core/serialization.cpp

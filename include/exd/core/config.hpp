@@ -1,32 +1,21 @@
 #pragma once
 
 #include <string>
-#include <string_view>
-#include <unordered_map>
 #include <optional>
-#include <sstream>
 
 namespace exd::core {
 
-/// @brief Simple key-value configuration system with typed getters.
-///
-/// Read from TOML/JSON files or command-line args. Used by exd::app::Application.
 class Config {
 public:
     Config() = default;
-
-    /// ── Setters ──────────────────────────────────────
     void set(const std::string& key, const std::string& value);
     void set_default(const std::string& key, const std::string& value);
 
     template <typename T>
     void set(const std::string& key, const T& value) {
-        std::ostringstream oss;
-        oss << value;
-        set(key, oss.str());
+        set(key, std::to_string(value));
     }
 
-    /// ── Getters ──────────────────────────────────────
     [[nodiscard]] std::optional<std::string> get(const std::string& key) const;
 
     template <typename T>
@@ -40,8 +29,6 @@ public:
     }
 
     [[nodiscard]] bool has(const std::string& key) const;
-
-    /// ── File I/O ─────────────────────────────────────
     void load_toml(const std::string& path);
     void save_toml(const std::string& path) const;
 
