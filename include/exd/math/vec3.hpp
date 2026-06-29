@@ -5,7 +5,7 @@
 #include <array>
 #include <type_traits>
 
-namespace ext::math {
+namespace exd::math {
 
 /// Three-component vector. The foundational type for all geometry.
 template <typename T>
@@ -65,4 +65,4 @@ using Vec3i = Vec3<int>;
 template <typename T>
 Vec3<T> operator*(T s, const Vec3<T>& v) { return v * s; }
 
-} // namespace ext::math
+} // namespace exd::math

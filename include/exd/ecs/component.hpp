@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <type_traits>
 
-namespace ext::ecs {
+namespace exd::ecs {
 
 /// Every component type gets a unique runtime ID via this template.
 /// Components are POD or trivially-movable structs with no inheritance requirement.
@@ -27,4 +27,4 @@ concept Component = std::is_trivially_move_constructible_v<T>
                  && std::is_trivially_destructible_v<T>
                  && !std::is_pointer_v<T>;
 
-} // namespace ext::ecs
+} // namespace exd::ecs

@@ -4,7 +4,7 @@
 #include <cmath>
 #include <iostream>
 
-namespace ext::math {
+namespace exd::math {
 
 /// Column-major 4x4 matrix (16 floats).
 struct Mat4 {
@@ -126,4 +126,4 @@ struct Mat4 {
     }
 };
 
-} // namespace ext::math
+} // namespace exd::math

@@ -2,7 +2,7 @@
 #include <cmath>
 #include <ostream>
 
-namespace ext::math {
+namespace exd::math {
 
 struct Vec3 {
     float x{}, y{}, z{};
@@ -38,4 +38,4 @@ inline std::ostream& operator<<(std::ostream& os, const Vec3& v) {
     return os << "Vec3(" << v.x << ", " << v.y << ", " << v.z << ")";
 }
 
-} // namespace ext::math
+} // namespace exd::math

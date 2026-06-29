@@ -3,7 +3,7 @@
 #include <cmath>
 #include <ostream>
 
-namespace ext::math {
+namespace exd::math {
 
 struct Quat {
     float w{1}, x{0}, y{0}, z{0};
@@ -93,4 +93,4 @@ inline std::ostream& operator<<(std::ostream& os, const Quat& q) {
     return os << "Quat(w=" << q.w << ", x=" << q.x << ", y=" << q.y << ", z=" << q.z << ")";
 }
 
-} // namespace ext::math
+} // namespace exd::math

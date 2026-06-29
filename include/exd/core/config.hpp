@@ -6,11 +6,11 @@
 #include <optional>
 #include <sstream>
 
-namespace ext::core {
+namespace exd::core {
 
 /// @brief Simple key-value configuration system with typed getters.
 ///
-/// Read from TOML/JSON files or command-line args. Used by ext::app::Application.
+/// Read from TOML/JSON files or command-line args. Used by exd::app::Application.
 class Config {
 public:
     Config() = default;
@@ -49,4 +49,4 @@ private:
     std::unordered_map<std::string, std::string> values_;
 };
 
-} // namespace ext::core
+} // namespace exd::core

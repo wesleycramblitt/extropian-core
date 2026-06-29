@@ -1,6 +1,6 @@
 #pragma once
 
-namespace ext::ecs {
+namespace exd::ecs {
 
 class Registry;
 
@@ -18,4 +18,4 @@ public:
     [[nodiscard]] virtual const void* active_modes() const { return nullptr; }
 };
 
-} // namespace ext::ecs
+} // namespace exd::ecs

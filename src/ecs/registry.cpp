@@ -1,7 +1,7 @@
-#include <ext/ecs/registry.hpp>
+#include <exd/ecs/registry.hpp>
 #include <cstdio>
 
-namespace ext::ecs {
+namespace exd::ecs {
 
 Entity Registry::create(std::string name) {
     Entity::id_type id;
@@ -53,4 +53,4 @@ size_t Registry::entity_count() const noexcept {
     return count;
 }
 
-} // namespace ext::ecs
+} // namespace exd::ecs

@@ -15,7 +15,7 @@
 #include <iterator>
 #include <string>
 
-namespace ext::ecs {
+namespace exd::ecs {
 
 struct Entity {
     using id_type = uint32_t;
@@ -376,4 +376,4 @@ inline auto Registry::view() { return View<Cs...>(*this); }
 template <class... Cs>
 inline auto Registry::view() const { return View<const Cs...>(*this); }
 
-} // namespace ext::ecs
+} // namespace exd::ecs

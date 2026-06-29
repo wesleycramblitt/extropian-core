@@ -6,7 +6,7 @@ project(extropian-core VERSION 0.1.0 LANGUAGES CXX
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_library(ext-core STATIC
+add_library(exd-core STATIC
     # ECS
     src/ecs/registry.cpp
 
@@ -27,15 +27,15 @@ add_library(ext-core STATIC
     src/geom/spatial.cpp
 )
 
-target_include_directories(ext-core PUBLIC include)
-target_include_directories(ext-core PRIVATE src)
+target_include_directories(exd-core PUBLIC include)
+target_include_directories(exd-core PRIVATE src)
 
-add_library(ext::core ALIAS ext-core)
+add_library(exd::core ALIAS exd-core)
 
 include(GNUInstallDirs)
-install(TARGETS ext-core EXPORT ext-core-targets ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS exd-core EXPORT exd-core-targets ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-install(EXPORT ext-core-targets DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ext-core)
+install(EXPORT exd-core-targets DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/exd-core)
 
 option(EXT_CORE_BUILD_TESTS "Build tests" OFF)
 if(EXT_CORE_BUILD_TESTS)

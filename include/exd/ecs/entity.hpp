@@ -4,7 +4,7 @@
 #include <string_view>
 #include <string>
 
-namespace ext::ecs {
+namespace exd::ecs {
 
 /// Entity handle: an opaque 64-bit value combining id and generation.
 /// Generation prevents use-after-free: incrementing generation invalidates stale handles.
@@ -25,10 +25,10 @@ struct Entity {
     static constexpr Entity null() { return {0, 0}; }
 };
 
-} // namespace ext::ecs
+} // namespace exd::ecs
 
 namespace std {
-    template<> struct hash<ext::ecs::Entity> {
-        size_t operator()(const ext::ecs::Entity& e) const { return e.key(); }
+    template<> struct hash<exd::ecs::Entity> {
+        size_t operator()(const exd::ecs::Entity& e) const { return e.key(); }
     };
 }
