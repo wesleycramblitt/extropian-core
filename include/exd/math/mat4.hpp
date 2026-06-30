@@ -47,10 +47,10 @@ struct Mat4 {
         return r;
     }
 
-    [[nodiscard]] static Mat4 look_at(const Vec3ff& eye, const Vec3f& center, const Vec3f& up) {
-        Vec3f f = (center - eye).norm();
-        Vec3f s = f.cross(up).norm();
-        Vec3f u = s.cross(f).norm();
+    [[nodiscard]] static Mat4 look_at(const Vec3f& eye, const Vec3f& center, const Vec3f& up) {
+        Vec3f f = (center - eye).normalized();
+        Vec3f s = f.cross(up).normalized();
+        Vec3f u = s.cross(f).normalized();
 
         Mat4 r = identity();
         r.m[0]  = s.x;  r.m[4]  = s.y;  r.m[8]  = s.z;
@@ -63,8 +63,8 @@ struct Mat4 {
     }
 
     /// Build model matrix: Translation * Rotation * Scale
-    [[nodiscard]] static Mat4 trs(const Vec3ff& pos, const Quat& rot, const Vec3f& scale) {
-        Quat q = rot.norm();
+    [[nodiscard]] static Mat4 trs(const Vec3f& pos, const Quat& rot, const Vec3f& scale) {
+        Quat q = rot.normalized();
         const float x = q.x, y = q.y, z = q.z, w = q.w;
         const float xx = x*x, yy = y*y, zz = z*z;
         const float xy = x*y, xz = x*z, yz = y*z;
@@ -88,9 +88,9 @@ struct Mat4 {
     }
 
     /// Build model matrix with skew: T * R * K * S
-    [[nodiscard]] static Mat4 trs(const Vec3ff& pos, const Quat& rot,
+    [[nodiscard]] static Mat4 trs(const Vec3f& pos, const Quat& rot,
                                    const Vec3f& scale, const Vec3f& skew) {
-        Quat q = rot.norm();
+        Quat q = rot.normalized();
         const float x = q.x, y = q.y, z = q.z, w = q.w;
         const float xx = x*x, yy = y*y, zz = z*z;
         const float xy = x*y, xz = x*z, yz = y*z;

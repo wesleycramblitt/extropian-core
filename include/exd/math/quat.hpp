@@ -17,23 +17,23 @@ struct Quat {
         };
     }
 
-    [[nodiscard]] static Quat from_axis_angle(const Vec3ff& axis, float angle_rad) {
-        Vec3f n = axis.norm();
+    [[nodiscard]] static Quat from_axis_angle(const Vec3f& axis, float angle_rad) {
+        Vec3f n = axis.normalized();
         float half = 0.5f * angle_rad;
         float s = std::sin(half);
         float c = std::cos(half);
         return {c, n.x * s, n.y * s, n.z * s};
     }
 
-    [[nodiscard]] Vec3 right() const {
+    [[nodiscard]] Vec3f right() const {
         return {1 - 2*(y*y + z*z), 2*(x*y + w*z), 2*(x*z - w*y)};
     }
 
-    [[nodiscard]] Vec3 forward() const {
+    [[nodiscard]] Vec3f forward() const {
         return {2.0f*(x*z + w*y), 2.0f*(y*z - w*x), -(1.0f - 2.0f*(x*x + y*y))};
     }
 
-    [[nodiscard]] Vec3 up() const {
+    [[nodiscard]] Vec3f up() const {
         return {2.0f*(x*y - w*z), 1.0f - 2.0f*(x*x + z*z), 2.0f*(y*z + w*x)};
     }
 
