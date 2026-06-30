@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <string>
+#include <sstream>
 #include <unordered_map>
 #include <optional>
 
@@ -11,6 +11,7 @@ class Config {
 public:
     Config() = default;
     void set(const std::string& key, const std::string& value);
+    void set(const std::string& key, const char* value) { set(key, std::string(value)); }
     void set_default(const std::string& key, const std::string& value);
 
     template <typename T>
