@@ -17,8 +17,8 @@ struct Quat {
         };
     }
 
-    [[nodiscard]] static Quat from_axis_angle(const Vec3& axis, float angle_rad) {
-        Vec3 n = axis.norm();
+    [[nodiscard]] static Quat from_axis_angle(const Vec3ff& axis, float angle_rad) {
+        Vec3f n = axis.norm();
         float half = 0.5f * angle_rad;
         float s = std::sin(half);
         float c = std::cos(half);
@@ -81,9 +81,9 @@ struct Quat {
     }
 };
 
-inline Vec3 operator*(const Quat& q, const Vec3& v) {
-    Vec3 qv{q.x, q.y, q.z};
-    Vec3 t = 2.0f * qv.cross(v);
+inline Vec3f operator*(const Quat& q, const Vec3f& v) {
+    Vec3f qv{q.x, q.y, q.z};
+    Vec3f t = 2.0f * qv.cross(v);
     return {v.x + q.w * t.x + qv.cross(t).x,
             v.y + q.w * t.y + qv.cross(t).y,
             v.z + q.w * t.z + qv.cross(t).z};
