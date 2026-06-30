@@ -289,21 +289,21 @@ public:
 // ====================== Template implementations ======================
 
 template <class T>
-inline auto* Registry::pool_ptr() noexcept {
+inline Registry::Pool<std::remove_const_t<T>>* Registry::pool_ptr() noexcept {
     auto it = pools_.find(std::type_index(typeid(std::remove_const_t<T>)));
     if (it == pools_.end()) return nullptr;
     return static_cast<Pool<std::remove_const_t<T>>*>(it->second.get());
 }
 
 template <class T>
-inline auto* Registry::pool_ptr() const noexcept {
+inline Registry::Pool<std::remove_const_t<T>>* Registry::pool_ptr() const noexcept {
     auto it = pools_.find(std::type_index(typeid(std::remove_const_t<T>)));
     if (it == pools_.end()) return nullptr;
     return static_cast<const Pool<std::remove_const_t<T>>*>(it->second.get());
 }
 
 template <class T>
-inline auto& Registry::ensure_pool() {
+inline Registry::Pool<std::remove_const_t<T>>inline auto& Registry::ensure_pool() Registry::ensure_pool() {
     using U = std::remove_const_t<T>;
     auto key = std::type_index(typeid(U));
     auto it = pools_.find(key);
