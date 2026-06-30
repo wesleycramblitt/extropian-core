@@ -56,11 +56,10 @@ struct Vec3 {
     static Vec3 right() { return {1, 0, 0}; }
 };
 
-// Common aliases
+// Common aliases (Vec3 is a template; use Vec3f for float, Vec3d for double, Vec3i for int)
 using Vec3f = Vec3<float>;
 using Vec3d = Vec3<double>;
 using Vec3i = Vec3<int>;
-using Vec3  = Vec3<float>;  // default concrete type
 
 // Scalar * Vec3
 template <typename T>
