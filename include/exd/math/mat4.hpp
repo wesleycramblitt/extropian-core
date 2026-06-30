@@ -64,7 +64,7 @@ struct Mat4 {
 
     /// Build model matrix: Translation * Rotation * Scale
     [[nodiscard]] static Mat4 trs(const Vec3f& pos, const Quat& rot, const Vec3f& scale) {
-        Quat q = rot.normalized();
+        Quat q = rot.norm();
         const float x = q.x, y = q.y, z = q.z, w = q.w;
         const float xx = x*x, yy = y*y, zz = z*z;
         const float xy = x*y, xz = x*z, yz = y*z;
@@ -90,7 +90,7 @@ struct Mat4 {
     /// Build model matrix with skew: T * R * K * S
     [[nodiscard]] static Mat4 trs(const Vec3f& pos, const Quat& rot,
                                    const Vec3f& scale, const Vec3f& skew) {
-        Quat q = rot.normalized();
+        Quat q = rot.norm();
         const float x = q.x, y = q.y, z = q.z, w = q.w;
         const float xx = x*x, yy = y*y, zz = z*z;
         const float xy = x*y, xz = x*z, yz = y*z;
