@@ -159,13 +159,13 @@ private:
     };
 
     template <class T>
-    Pool<std::remove_const_t<T>>* pool_ptr() noexcept;
+    auto* pool_ptr() noexcept;
 
     template <class T>
-    const Pool<std::remove_const_t<T>>* pool_ptr() const noexcept;
+    auto* pool_ptr() const noexcept;
 
     template <class T>
-    Pool<std::remove_const_t<T>>& ensure_pool();
+    auto& ensure_pool();
 
     std::vector<Entity::gen_type> gen_;
     std::vector<uint8_t> alive_;
@@ -289,14 +289,14 @@ public:
 // ====================== Template implementations ======================
 
 template <class T>
-inline Registry::Pool<std::remove_const_t<T>>* Registry::pool_ptr() noexcept {
+inline auto* Registry::pool_ptr() noexcept {
     auto it = pools_.find(std::type_index(typeid(std::remove_const_t<T>)));
     if (it == pools_.end()) return nullptr;
     return static_cast<Pool<std::remove_const_t<T>>*>(it->second.get());
 }
 
 template <class T>
-inline Registry::Pool<std::remove_const_t<T>>* Registry::pool_ptr() const noexcept {
+inline auto* Registry::pool_ptr() const noexcept {
     auto it = pools_.find(std::type_index(typeid(std::remove_const_t<T>)));
     if (it == pools_.end()) return nullptr;
     return static_cast<const Pool<std::remove_const_t<T>>*>(it->second.get());
