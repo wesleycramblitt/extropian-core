@@ -24,7 +24,7 @@ add_library(exd-core STATIC
     src/geom/spatial.cpp
 )
 
-target_include_directories(exd-core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(exd-core PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>")
 target_include_directories(exd-core PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 add_library(exd::core ALIAS exd-core)
