@@ -159,13 +159,34 @@ private:
     };
 
     template <class T>
-    auto* pool_ptr() noexcept;
+    auto* pool_ptr() noexcept {
+        auto it = pools_.find(std::type_index(typeid(std::remove_const_t<T>)));
+        return (it != pools_.end())
+            ? static_cast<Pool<std::remove_const_t<T>>*>(it->second.get())
+            : nullptr;
+    }
 
     template <class T>
-    auto* pool_ptr() const noexcept;
+    auto* pool_ptr() const noexcept {
+        auto it = pools_.find(std::type_index(typeid(std::remove_const_t<T>)));
+        return (it != pools_.end())
+            ? static_cast<const Pool<std::remove_const_t<T>>*>(it->second.get())
+            : nullptr;
+    }
 
     template <class T>
-    auto& ensure_pool();
+    auto& ensure_pool() {
+        using U = std::remove_const_t<T>;
+        auto key = std::type_index(typeid(U));
+        auto it = pools_.find(key);
+        if (it == pools_.end()) {
+            auto p = std::make_unique<Pool<U>>();
+            auto* raw = p.get();
+            pools_.emplace(key, std::move(p));
+            return *raw;
+        }
+        return *static_cast<Pool<U>*>(it->second.get());
+    }
 
     std::vector<Entity::gen_type> gen_;
     std::vector<uint8_t> alive_;
@@ -287,34 +308,6 @@ public:
 };
 
 // ====================== Template implementations ======================
-
-template <class T>
-inline auto* Registry::pool_ptr() noexcept {
-    auto it = pools_.find(std::type_index(typeid(std::remove_const_t<T>)));
-    if (it == pools_.end()) return nullptr;
-    return static_cast<Pool<std::remove_const_t<T>>*>(it->second.get());
-}
-
-template <class T>
-inline auto* Registry::pool_ptr() const noexcept {
-    auto it = pools_.find(std::type_index(typeid(std::remove_const_t<T>)));
-    if (it == pools_.end()) return nullptr;
-    return static_cast<const Pool<std::remove_const_t<T>>*>(it->second.get());
-}
-
-template <class T>
-inline auto& Registry::ensure_pool() {
-    using U = std::remove_const_t<T>;
-    auto key = std::type_index(typeid(U));
-    auto it = pools_.find(key);
-    if (it == pools_.end()) {
-        auto p = std::make_unique<Pool<U>>();
-        auto* raw = p.get();
-        pools_.emplace(key, std::move(p));
-        return *raw;
-    }
-    return *static_cast<Pool<U>*>(it->second.get());
-}
 
 template <class T, class... Args>
 inline T& Registry::emplace(Entity e, Args&&... args) {
