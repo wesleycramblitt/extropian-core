@@ -4,33 +4,35 @@
 
 namespace exd::geom {
 
-using math::Vec3;
+using math::Vec3f;
 
 // ── Geometric primitives ────────────────────────────
 
-struct Sphere   { Vec3 center; float radius; };
-struct Box      { Vec3 center; Vec3 half_extents; };
-struct Capsule  { Vec3 a, b; float radius; };
-struct Cylinder { Vec3 base, axis; float radius, height; };
-struct Plane    { Vec3 normal; float distance; };
+struct Sphere   { Vec3f center; float radius; };
+struct Box      { Vec3f center; Vec3f half_extents; };
+struct Capsule  { Vec3f a, b; float radius; };
+struct Cylinder { Vec3f base, axis; float radius, height; };
+struct Plane    { Vec3f normal; float distance; };
 
 // ── Signed Distance Functions ────────────────────────
 
-float sdf_sphere(const Vec3& p, const Sphere& s) {
+static float sdf_sphere(const Vec3f& p, const Sphere& s) {
     return (p - s.center).length() - s.radius;
 }
 
-float sdf_box(const Vec3& p, const Box& b) {
-    Vec3 q = {
-        (std::abs)(p.x - b.center.x) - b.half_extents.x,
-        (std::abs)(p.y - b.center.y) - b.half_extents.y,
-        (std::abs)(p.z - b.center.z) - b.half_extents.z
-    };
-    Vec3 d = {(std::max)(q.x, 0.0f), (std::max)(q.y, 0.0f), (std::max)(q.z, 0.0f)};
-    return d.length() + (std::min)((std::max)(q.x, (std::max)(q.y, q.z)), 0.0f);
+static float sdf_box(const Vec3f& p, const Box& b) {
+    float qx = std::abs(p.x - b.center.x) - b.half_extents.x;
+    float qy = std::abs(p.y - b.center.y) - b.half_extents.y;
+    float qz = std::abs(p.z - b.center.z) - b.half_extents.z;
+    float dx = std::max(qx, 0.0f);
+    float dy = std::max(qy, 0.0f);
+    float dz = std::max(qz, 0.0f);
+    float d_len = std::sqrt(dx*dx + dy*dy + dz*dz);
+    float m = std::min(std::max(qx, std::max(qy, qz)), 0.0f);
+    return d_len + m;
 }
 
-float sdf_plane(const Vec3& p, const Plane& pl) {
+static float sdf_plane(const Vec3f& p, const Plane& pl) {
     return p.dot(pl.normal) - pl.distance;
 }
 
