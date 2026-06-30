@@ -303,7 +303,7 @@ inline auto* Registry::pool_ptr() const noexcept {
 }
 
 template <class T>
-inline Registry::Pool<std::remove_const_t<T>>inline auto& Registry::ensure_pool() Registry::ensure_pool() {
+inline auto& Registry::ensure_pool() {
     using U = std::remove_const_t<T>;
     auto key = std::type_index(typeid(U));
     auto it = pools_.find(key);
