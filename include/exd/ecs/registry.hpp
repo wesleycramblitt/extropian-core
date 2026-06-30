@@ -364,9 +364,9 @@ inline const T* Registry::try_get(Entity e) const noexcept {
 }
 
 template <class... Cs>
-inline auto Registry::view() { return View<Cs...>(*this); }
+inline auto Registry::view() -> View<Cs...> { return View<Cs...>(*this); }
 
 template <class... Cs>
-inline auto Registry::view() const { return View<const Cs...>(*this); }
+inline auto Registry::view() const -> View<const Cs...> { return View<const Cs...>(*this); }
 
 } // namespace exd::ecs
