@@ -39,9 +39,9 @@ inline bool ray_aabb_intersect(const Ray& ray, const AABB& box, float& t_min, fl
         float inv_d = 1.0f / (&ray.direction.x)[i];
         float t0 = ((&box.min.x)[i] - (&ray.origin.x)[i]) * inv_d;
         float t1 = ((&box.max.x)[i] - (&ray.origin.x)[i]) * inv_d;
-        if (inv_d < 0.0f) std::swap(t0, t1);
-        t_min = std::max(t_min, t0);
-        t_max = std::min(t_max, t1);
+        if (inv_d < 0.0f) (std::swap)(t0, t1);
+        t_min = (std::max)(t_min, t0);
+        t_max = (std::min)(t_max, t1);
         if (t_max < t_min) return false;
     }
     return true;
