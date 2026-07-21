@@ -17,6 +17,14 @@ struct Quat {
         };
     }
 
+    [[nodiscard]] Quat operator+(const Quat& b) const {
+        return {w + b.w, x + b.x, y + b.y, z + b.z};
+    }
+
+    [[nodiscard]] Quat operator-(const Quat& b) const {
+        return {w - b.w, x - b.x, y - b.y, z - b.z};
+    }
+
     [[nodiscard]] static Quat from_axis_angle(const Vec3f& axis, float angle_rad) {
         Vec3f n = axis.normalized();
         float half = 0.5f * angle_rad;

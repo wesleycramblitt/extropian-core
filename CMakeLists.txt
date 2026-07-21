@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 project(extropian-core VERSION 0.1.0 LANGUAGES CXX
-    DESCRIPTION "Extropian Core: math, ECS, geometry, and foundation"
+    DESCRIPTION "Extropian Core: math, ECS, and foundation"
 )
 
 set(CMAKE_CXX_STANDARD 23)
@@ -18,10 +18,6 @@ add_library(exd-core STATIC
     src/core/plugin.cpp
     src/core/event.cpp
     src/core/units.cpp
-
-    # Geometry stubs
-    src/geom/primitives.cpp
-    src/geom/spatial.cpp
 )
 
 target_include_directories(exd-core PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>")

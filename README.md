@@ -8,9 +8,8 @@ Zero dependencies beyond the C++ standard library. Provides the bedrock types an
 
 | Module | What It Provides |
 |--------|-----------------|
-| `ext::math` | Vec3, Vec4, Mat3, Mat4, Quat, dual quaternion, transforms |
+| `ext::math` | Vec2, Vec3, Vec4, Mat3, Mat4, Quat, DualQuat, transforms |
 | `ext::ecs` | Entity, Registry, ISystem, Component<T>, Views, resource cache |
-| `ext::geom` | Primitives (sphere, box, capsule, etc.), CSG tree, spatial queries (octree, BVH), SDFs |
 | `ext::core` | Allocators, serialization, plugin loader, event bus, config parser, logging, SI units |
 
 ## Building
@@ -26,7 +25,7 @@ None. C++23 and the standard library only.
 
 ## Namespace
 
-All types are in `ext::` with sub-namespaces (`ext::math`, `ext::ecs`, `ext::geom`, `ext::core`).
+All types are in `ext::` with sub-namespaces (`ext::math`, `ext::ecs`, `ext::core`).
 
 ## License
 
