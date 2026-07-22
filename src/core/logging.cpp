@@ -1,12 +1,17 @@
+#include <exd/core/logging.hpp>
+
 #include <cstdio>
 #include <cstdarg>
 #include <string>
 #include <chrono>
 #include <ctime>
+#include <mutex>
 
 namespace exd::core {
 
-enum class LogLevel { Debug, Info, Warning, Error };
+namespace {
+    std::mutex g_log_mutex;
+}
 
 static const char* level_str(LogLevel lv) {
     switch (lv) {
@@ -19,6 +24,7 @@ static const char* level_str(LogLevel lv) {
 }
 
 static void log_impl(LogLevel lv, const char* fmt, va_list args) {
+    std::lock_guard<std::mutex> lock(g_log_mutex);
     auto now = std::chrono::system_clock::now();
     auto t = std::chrono::system_clock::to_time_t(now);
     char time_buf[32];
