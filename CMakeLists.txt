@@ -29,9 +29,16 @@ add_library(exd::core ALIAS exd-core)
 #install(TARGETS exd-core EXPORT exd-core-targets ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 #install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 #install(EXPORT exd-core-targets DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/exd-core)
-#
-#option(EXT_CORE_BUILD_TESTS "Build tests" OFF)
-#if(EXT_CORE_BUILD_TESTS)
-#    enable_testing()
-#    add_subdirectory(tests)
-#endif()
+
+# ── Tests ──
+option(EXT_CORE_BUILD_TESTS "Build tests" ON)
+if(EXT_CORE_BUILD_TESTS)
+    enable_testing()
+    include(FetchContent)
+    FetchContent_Declare(doctest
+        GIT_REPOSITORY https://github.com/doctest/doctest.git
+        GIT_TAG v2.4.11
+    )
+    FetchContent_MakeAvailable(doctest)
+    add_subdirectory(tests)
+endif()

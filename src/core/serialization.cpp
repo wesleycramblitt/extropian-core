@@ -1,3 +1,4 @@
+#include "serialization.h"
 #include <string>
 #include <vector>
 #include <fstream>

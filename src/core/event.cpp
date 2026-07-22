@@ -1,31 +1,18 @@
-#include <vector>
-#include <functional>
-#include <string>
-#include <unordered_map>
+#include "event.h"
 
 namespace exd::core {
 
-/// Simple type-erased event bus. Listeners register callbacks by event name.
-/// Thread-unsafe — use on the main thread only.
-class EventBus {
-public:
-    using Callback = std::function<void(const void* payload)>;
+void EventBus::on(const std::string& event, Callback cb) {
+    listeners_[event].push_back(std::move(cb));
+}
 
-    void on(const std::string& event, Callback cb) {
-        listeners_[event].push_back(std::move(cb));
-    }
+void EventBus::emit(const std::string& event, const void* payload) {
+    auto it = listeners_.find(event);
+    if (it != listeners_.end())
+        for (auto& cb : it->second) cb(payload);
+}
 
-    void emit(const std::string& event, const void* payload = nullptr) {
-        auto it = listeners_.find(event);
-        if (it != listeners_.end())
-            for (auto& cb : it->second) cb(payload);
-    }
-
-    void clear() { listeners_.clear(); }
-
-private:
-    std::unordered_map<std::string, std::vector<Callback>> listeners_;
-};
+void EventBus::clear() { listeners_.clear(); }
 
 // Global singleton
 static EventBus& bus() {
