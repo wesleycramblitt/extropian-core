@@ -28,7 +28,7 @@ public:
         if (!opt) return default_val;
         T val{};
         std::istringstream iss(*opt);
-        iss >> val;
+        if (!(iss >> val)) return default_val;
         return val;
     }
 

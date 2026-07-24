@@ -37,10 +37,9 @@ TEST_CASE("f_from_u_rectangular_duct basic") {
     CHECK(std::isfinite(f));
 }
 
-TEST_CASE("f_from_u_rectangular_duct near-zero velocity") {
-    // Zero velocity causes division by zero (Re=0 → f=∞). Use tiny velocity instead.
-    double f = f_from_u_rectangular_duct(0.1, 0.05, 1.2, 1.5e-5, 1e-10);
-    CHECK(std::isfinite(f));
+TEST_CASE("f_from_u_rectangular_duct zero velocity") {
+    double f = f_from_u_rectangular_duct(0.1, 0.05, 1.2, 1.5e-5, 0.0);
+    CHECK(f == doctest::Approx(0.0));  // early-exit guard
 }
 
 TEST_CASE("f_from_u_rectangular_duct square duct") {

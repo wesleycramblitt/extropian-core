@@ -11,6 +11,7 @@ double degrees_to_radians(double deg) { return deg * M_PI / 180.0; }
 // LBM force computation for rectangular duct
 double f_from_u_rectangular_duct(double width, double height,
                                   double rho, double nu, double target_u) {
+    if (target_u == 0.0) return 0.0;
     // Pressure-driven Poiseuille flow force for a rectangular duct
     double dh = (2.0 * width * height) / (width + height); // hydraulic diameter
     double re = target_u * dh / nu;

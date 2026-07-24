@@ -16,7 +16,7 @@ Entity Registry::create(std::string name) {
     }
     alive_[id] = 1;
     names_[id] = std::move(name);
-    return {id, gen_[id]};
+    return {id, gen_[id], names_[id]};
 }
 
 void Registry::destroy(Entity e) {

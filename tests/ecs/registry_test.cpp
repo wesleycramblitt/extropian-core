@@ -22,14 +22,8 @@ TEST_CASE("Registry create and destroy") {
 
 TEST_CASE("Registry entity names") {
     Registry reg;
-    // Note: Registry stores names internally; Entity::name is
-    // not populated by create() (design choice — names_ vector in Registry).
     auto e = reg.create("enemy");
-    // Entity is valid, has correct id/gen
-    CHECK(reg.valid(e));
-    // Name is stored internally — verify entity_count reflects it
-    CHECK(reg.entity_count() == 1);
-    (void)e;
+    CHECK(e.name == "enemy");
 }
 
 TEST_CASE("Registry destroy invalid is no-op") {
@@ -170,6 +164,7 @@ TEST_CASE("Registry entity reuse (free list)") {
     auto e2 = reg.create("second");
     CHECK(e2.id == e1.id);
     CHECK(e2.gen == e1.gen + 1);
+    CHECK(e2.name == "second");
     CHECK_FALSE(reg.has<Health>(e2)); // old component shouldn't persist
 }
 

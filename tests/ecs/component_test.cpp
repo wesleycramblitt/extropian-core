@@ -19,17 +19,20 @@ struct ComplexType {
     int* data = nullptr;
 };
 
-TEST_CASE("ComponentTraits id stability") {
-    // Same type always returns the same ID within one TU
+TEST_CASE("ComponentTraits id stability and uniqueness") {
     uint32_t id1 = ComponentTraits<Health>::id();
     uint32_t id2 = ComponentTraits<Health>::id();
     CHECK(id1 == id2);
+
+    // Different types now get truly unique IDs (global counter)
+    uint32_t pos_id = ComponentTraits<Position>::id();
+    CHECK(ComponentTraits<Health>::id() != pos_id);
 }
 
 TEST_CASE("ComponentTraits different types callable") {
     // Different types can both be queried without issue
-    ComponentTraits<Health>::id();
-    ComponentTraits<Position>::id();
+    (void)ComponentTraits<Health>::id();
+    (void)ComponentTraits<Position>::id();
     // No crash = pass
     CHECK(true);
 }
@@ -48,9 +51,10 @@ TEST_CASE("Component concept") {
 
 TEST_CASE("Component concept with multiple types") {
     struct Velocity { float vx, vy, vz; };
-    // Verify no crash and IDs are stable per-type
     uint32_t health_id = ComponentTraits<Health>::id();
-    CHECK(ComponentTraits<Health>::id()   == health_id);
-    CHECK(ComponentTraits<Position>::id() == ComponentTraits<Position>::id());
-    CHECK(ComponentTraits<Velocity>::id() == ComponentTraits<Velocity>::id());
+    uint32_t pos_id    = ComponentTraits<Position>::id();
+    uint32_t vel_id    = ComponentTraits<Velocity>::id();
+    CHECK(health_id != pos_id);
+    CHECK(health_id != vel_id);
+    CHECK(pos_id    != vel_id);
 }

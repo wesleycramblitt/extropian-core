@@ -52,11 +52,8 @@ TEST_CASE("Config get_or float") {
 TEST_CASE("Config get_or with invalid value") {
     Config cfg;
     cfg.set("bad", "not_a_number");
-    // Failed parse produces T{} (0 for int) and sets stream failbit.
-    // get_or returns default only when key is missing, not when parse fails.
     int result = cfg.get_or<int>("bad", -1);
-    // Stream leaves val at 0 on parse failure — don't assert exact value, just no crash
-    (void)result;
+    CHECK(result == -1);  // parse failure → return default
 }
 
 TEST_CASE("Config char* overloads") {
