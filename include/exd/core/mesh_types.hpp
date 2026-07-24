@@ -20,12 +20,14 @@ struct Vertex {
 
 // ── Topology ─────────────────────────────────────
 
+/// Indexed in order so that Triangles/Lines/Points values
+/// match the legacy exd::render::Topology enum for GL compatibility.
 enum class PrimitiveTopology {
-    Points,
-    Lines,
-    LineStrip,
-    Triangles,
-    TriangleStrip
+    Triangles      = 0,
+    Lines          = 1,
+    Points         = 2,
+    LineStrip      = 3,
+    TriangleStrip  = 4
 };
 
 // ── Bounds ───────────────────────────────────────
