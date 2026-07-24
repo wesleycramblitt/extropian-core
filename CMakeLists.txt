@@ -11,10 +11,12 @@ add_library(exd-core STATIC
     src/ecs/registry.cpp
 
     # Foundation
+    src/core/assert.cpp
     src/core/config.cpp
     src/core/logging.cpp
     src/core/serialization.cpp
     src/core/allocator.cpp
+    src/core/fs.cpp
     src/core/plugin.cpp
     src/core/event.cpp
     src/core/units.cpp

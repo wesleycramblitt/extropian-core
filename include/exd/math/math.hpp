@@ -10,3 +10,6 @@
 #include <exd/math/mat3.hpp>
 #include <exd/math/mat4.hpp>
 #include <exd/math/dual_quat.hpp>
+#include <exd/math/raycast.hpp>
+#include <exd/math/color.hpp>
+#include <exd/math/bounds.hpp>
