@@ -1,6 +1,6 @@
 #include <doctest/doctest.h>
 
-#include "core/allocator.h"
+#include <exd/core/allocator.hpp>
 
 using namespace exd::core;
 

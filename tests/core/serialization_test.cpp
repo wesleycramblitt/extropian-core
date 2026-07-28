@@ -6,7 +6,7 @@
 #include <cstdio>
 #include <fstream>
 
-#include "core/serialization.h"
+#include <exd/core/serialization.hpp>
 
 using namespace exd::core;
 

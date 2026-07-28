@@ -1,5 +1,5 @@
 #include <doctest/doctest.h>
-#include <exd/ecs/registry.hpp>
+#include <exd/ecs/view.hpp>
 #include <string>
 
 using namespace exd::ecs;

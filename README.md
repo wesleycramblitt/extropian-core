@@ -8,9 +8,9 @@ Zero dependencies beyond C++23 and the standard library. Provides math types, an
 
 | Module | What It Provides |
 |--------|-----------------|
-| `exd::math` | Vec2, Vec3, Vec4, Mat3, Mat4, Quat, DualQuat, transforms |
-| `exd::ecs` | Entity, Registry, Component concept, ISystem, sparse-set views |
-| `exd::core` | Config, logging, units, allocators, serialization, event bus, plugin loader, debug macros |
+| `exd::math` | Vec2, Vec3, Vec4, Mat3, Mat4, Quat, DualQuat, transforms, Bounds3, Raycast, Color |
+| `exd::ecs` | Entity, Registry, Component concept, ISystem, CommandBuffer, SystemGraph, sparse-set views |
+| `exd::core` | Config, logging, units, allocators, serialization, event bus, plugin loader, WindowState, debug macros |
 
 ---
 
@@ -171,7 +171,16 @@ dq.to_mat4(m);
 
 ## exd::ecs — Entity Component System
 
-Header in `include/exd/ecs/registry.hpp`. The source file `src/ecs/registry.cpp` contains entity lifecycle and introspection. Component pools are templates defined in the header.
+Headers in `include/exd/ecs/`. Core types:
+- `entity.hpp` — Entity handle with generation counter
+- `registry.hpp` — sparse-set component storage and lifecycle
+- `view.hpp` — View<Cs...> template for iterating entities with components
+- `component.hpp` — Component concept and type traits
+- `system.hpp` — ISystem abstract base
+- `command_buffer.hpp` — deferred mutation queue
+- `system_graph.hpp` — ordered system execution
+
+The source file `src/ecs/registry.cpp` contains entity lifecycle and introspection.
 
 ### Entity
 
@@ -319,10 +328,10 @@ double f = f_from_u_rectangular_duct(width, height, rho, nu, target_u);
 
 ### LinearAllocator — Bump Allocator
 
-Per-frame temporary allocations. Header in `src/core/allocator.h`.
+Per-frame temporary allocations. Header in `include/exd/core/allocator.hpp`.
 
 ```cpp
-#include "core/allocator.h"  // internal header — not in public API yet
+#include <exd/core/allocator.hpp>
 
 LinearAllocator alloc(1024 * 1024);            // 1 MB
 
@@ -364,10 +373,10 @@ void event_emit(const char* event, const void* payload);
 
 ### Serialization — Binary Blob & JSON Helpers
 
-Header in `src/core/serialization.h` (internal).
+Header in `include/exd/core/serialization.hpp`.
 
 ```cpp
-#include "core/serialization.h"
+#include <exd/core/serialization.hpp>
 
 // Binary
 auto blob = serialize_binary(&my_struct, sizeof(my_struct));
@@ -389,6 +398,38 @@ void* handle = plugin_load("libmyplugin.so");
 void* sym    = plugin_get_symbol(handle, "plugin_init");
 plugin_unload(handle);
 ```
+
+### WindowState — Abstract Input Interface
+
+Header in `include/exd/core/window_state.hpp`. Abstract interface for platform-agnostic input state, moved from `extropian-app` to `extropian-core` to break the dependency chain.
+
+```cpp
+#include <exd/core/window_state.hpp>
+
+struct WindowState {
+    virtual ~WindowState() = default;
+
+    virtual void get_dimensions(int& w, int& h, float& aspect) const = 0;
+    virtual bool was_key_pressed(int scancode) const = 0;
+    virtual bool was_key_released(int scancode) const = 0;
+    virtual void reset_mouse_delta() = 0;
+    virtual bool mouse_button_down(int button) const = 0;
+
+    InputMode   input_mode      = InputMode::FPS;
+    const bool* keyboard_state  = nullptr;
+    float       mouse_rel_x     = 0.0f;
+    float       mouse_rel_y     = 0.0f;
+    float       scroll_x        = 0.0f;
+    float       scroll_y        = 0.0f;
+    bool        grid_visible    = true;
+    bool        wireframe       = false;
+    // ... gamepad state ...
+};
+```
+
+Both platforms implement this interface:
+- **Desktop**: `exd::app::Window` (SDL3-backed, in extropian-app)
+- **Web**: Web input handler (in canvas-web)
 
 ### Debug Macros
 
@@ -418,9 +459,6 @@ GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, vbo));
 
 # Run all tests
 ./test.sh
-
-# Run a single test
-./run.sh test_vec3
 ```
 
 Or manually:
@@ -465,9 +503,9 @@ Test dependencies are fetched automatically by CMake:
 ## Namespace
 
 ```
-exd::math    — Vec2-4, Mat3-4, Quat, DualQuat
-exd::ecs     — Entity, Registry, Component, ISystem, View
-exd::core    — Config, logging, units, allocator, event bus, serialization, plugin
+exd::math    — Vec2-4, Mat3-4, Quat, DualQuat, Bounds3, Raycast, Color
+exd::ecs     — Entity, Registry, Component, ISystem, View, CommandBuffer, SystemGraph
+exd::core    — Config, logging, units, allocator, event bus, serialization, plugin, WindowState
 ```
 
 Umbrella header: `#include <exd/ext.hpp>` pulls in all public modules.
