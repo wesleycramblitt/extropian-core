@@ -1,10 +1,20 @@
 cmake_minimum_required(VERSION 3.21)
 project(extropian-core VERSION 0.1.0 LANGUAGES CXX
-    DESCRIPTION "Extropian Core: math, ECS, and foundation"
+    DESCRIPTION "Extropian Core: math, ECS, types, and foundation"
 )
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# ── Dependencies ──
+include(FetchContent)
+
+# nlohmann/json — header-only JSON library for type serialization
+FetchContent_Declare(nlohmann_json
+    GIT_REPOSITORY https://github.com/nlohmann/json.git
+    GIT_TAG v3.11.3
+)
+FetchContent_MakeAvailable(nlohmann_json)
 
 add_library(exd-core STATIC
     # ECS
@@ -20,10 +30,12 @@ add_library(exd-core STATIC
     src/core/plugin.cpp
     src/core/event.cpp
     src/core/units.cpp
+    src/core/visual_tree.cpp
 )
 
 target_include_directories(exd-core PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>")
 target_include_directories(exd-core PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(exd-core PUBLIC nlohmann_json::nlohmann_json)
 
 add_library(exd::core ALIAS exd-core)
 
