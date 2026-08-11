@@ -47,6 +47,18 @@ struct Mat4 {
         return r;
     }
 
+    [[nodiscard]] static Mat4 orthographic(float left, float right, float bottom, float top, float znear, float zfar) {
+        Mat4 r{};
+        r.m[0]  = 2.0f / (right - left);
+        r.m[5]  = 2.0f / (top - bottom);
+        r.m[10] = -2.0f / (zfar - znear);
+        r.m[12] = -(right + left) / (right - left);
+        r.m[13] = -(top + bottom) / (top - bottom);
+        r.m[14] = -(zfar + znear) / (zfar - znear);
+        r.m[15] = 1.0f;
+        return r;
+    }
+
     [[nodiscard]] static Mat4 look_at(const Vec3f& eye, const Vec3f& center, const Vec3f& up) {
         Vec3f f = (center - eye).normalized();
         Vec3f s = f.cross(up).normalized();

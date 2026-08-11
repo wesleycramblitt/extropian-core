@@ -30,7 +30,6 @@ add_library(exd-core STATIC
     src/core/plugin.cpp
     src/core/event.cpp
     src/core/units.cpp
-    src/core/visual_tree.cpp
 )
 
 target_include_directories(exd-core PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>")

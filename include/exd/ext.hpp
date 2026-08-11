@@ -26,7 +26,6 @@
 #include <exd/core/random.hpp>
 #include <exd/core/serialization.hpp>
 #include <exd/core/string_util.hpp>
-#include <exd/core/visual_tree.hpp>
 #include <exd/core/units.hpp>
 #include <exd/core/window_state.hpp>
 
