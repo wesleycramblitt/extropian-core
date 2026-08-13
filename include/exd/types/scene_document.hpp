@@ -28,6 +28,128 @@ namespace exd
 {
 
 // ═══════════════════════════════════════════════════════════════════
+// Diagram Primitives — shapes, ports, visual encoding, container layout
+// ═══════════════════════════════════════════════════════════════════
+
+// 2D geometric shape vocabulary (used by NodeType::Shape).
+enum class ShapeType
+{
+    Rect,          // plain rectangle
+    RoundedRect,   // rectangle with rounded corners
+    Circle,
+    Ellipse,
+    Diamond,       // rhombus (decision node)
+    Hexagon,
+    Parallelogram, // skewed box (I/O)
+    Triangle,      // directional marker
+    Pill,          // stadium / capsule
+    Cylinder,      // database / memory / storage
+    Stack,         // vertical stack of plates (memory stack)
+    Grid,          // N×M array of cells (thread-block grid, tensor)
+    Strip,         // horizontal lane of cells (warp / SIMD lane)
+    Document,      // note with folded corner
+};
+// Serialize as PascalCase strings to match the TypeScript mirror.
+NLOHMANN_JSON_SERIALIZE_ENUM(ShapeType, {
+    {ShapeType::Rect,          "Rect"},
+    {ShapeType::RoundedRect,   "RoundedRect"},
+    {ShapeType::Circle,        "Circle"},
+    {ShapeType::Ellipse,       "Ellipse"},
+    {ShapeType::Diamond,       "Diamond"},
+    {ShapeType::Hexagon,       "Hexagon"},
+    {ShapeType::Parallelogram, "Parallelogram"},
+    {ShapeType::Triangle,      "Triangle"},
+    {ShapeType::Pill,          "Pill"},
+    {ShapeType::Cylinder,      "Cylinder"},
+    {ShapeType::Stack,         "Stack"},
+    {ShapeType::Grid,          "Grid"},
+    {ShapeType::Strip,         "Strip"},
+    {ShapeType::Document,      "Document"},
+})
+
+// Connection point on a node, for edge routing.
+struct Port
+{
+    std::string id;
+    std::string side = "east";   // "north" | "east" | "south" | "west"
+    float position = 0.5f;       // 0..1 along the side (0 = left/top)
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Port, id, side, position)
+
+// A named scale mapping a metric domain to a visual range. Shared across
+// nodes so "color = complexity" stays consistent and legend-able.
+struct ScaleDef
+{
+    std::string id;
+    std::string type = "linear"; // linear | log | sqrt | threshold | quantize | ordinal
+    std::string scheme;          // color scheme: viridis | magma | inferno | plasma |
+                                 //   blues | diverging | category10 | category20 (empty = none)
+    nlohmann::json domain;       // [min,max] or [category,...]
+    nlohmann::json range;        // [min,max] (size/opacity) or [color,...] (optional)
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(ScaleDef, id, type, scheme, domain, range)
+
+// Binds one visual channel to a data field, scaled by a named ScaleDef.
+struct ChannelSpec
+{
+    std::string source;                // data path, e.g. "metrics.code_size"
+    std::optional<std::string> scale;  // id of a ScaleDef in SceneDocument.scales
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(ChannelSpec, source, scale)
+
+// Per-node visual encoding: metric → visual channel.
+struct Encoding
+{
+    std::optional<ChannelSpec> size;
+    std::optional<ChannelSpec> color;
+    std::optional<ChannelSpec> opacity;
+    std::optional<ChannelSpec> shape;
+    std::optional<ChannelSpec> label;
+    std::optional<ChannelSpec> edge_width;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Encoding, size, color, opacity, shape, label, edge_width)
+
+// Container layout algorithm — how a space arranges its child nodes.
+enum class LayoutAlgorithm
+{
+    Manual,    // explicit Transform.position
+    Grid,      // regular rows/columns
+    Layered,   // Sugiyama-style layered DAG (needs relations)
+    Tree,      // tidy tree (needs node.children nesting)
+    Radial,    // radial tree (needs node.children nesting)
+    Force,     // force-directed (needs relations)
+    Treemap,   // squarified treemap (size_by)
+    Pack,      // circle packing (size_by)
+    Swimlane,  // lanes grouped by lane_by
+    Timeline,  // time axis by time_by
+};
+// Serialize as lowercase strings to match the TypeScript mirror.
+NLOHMANN_JSON_SERIALIZE_ENUM(LayoutAlgorithm, {
+    {LayoutAlgorithm::Manual,   "manual"},
+    {LayoutAlgorithm::Grid,     "grid"},
+    {LayoutAlgorithm::Layered,  "layered"},
+    {LayoutAlgorithm::Tree,     "tree"},
+    {LayoutAlgorithm::Radial,   "radial"},
+    {LayoutAlgorithm::Force,    "force"},
+    {LayoutAlgorithm::Treemap,  "treemap"},
+    {LayoutAlgorithm::Pack,     "pack"},
+    {LayoutAlgorithm::Swimlane, "swimlane"},
+    {LayoutAlgorithm::Timeline, "timeline"},
+})
+
+// Container-level layout: how a space arranges its child nodes.
+struct DiagramLayout
+{
+    LayoutAlgorithm algorithm = LayoutAlgorithm::Manual;
+    std::optional<ChannelSpec> size_by;   // treemap/pack: channel driving area
+    std::optional<ChannelSpec> color_by;  // optional channel driving child color
+    std::optional<ChannelSpec> lane_by;   // swimlane: channel grouping nodes into lanes
+    std::optional<ChannelSpec> time_by;   // timeline: channel positioning nodes on the time axis
+    nlohmann::json params;                // per-algorithm: gap, cols, rankdir, orientation, node_width, node_height, padding, ...
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DiagramLayout, algorithm, size_by, color_by, lane_by, time_by, params)
+
+// ═══════════════════════════════════════════════════════════════════
 // Space Types
 // ═══════════════════════════════════════════════════════════════════
 
@@ -96,8 +218,9 @@ struct Space
     std::optional<Camera> camera;            // viewport3d only
     std::optional<GridHint> grid;            // world3d only
     bool scroll = false;                     // panel only
+    std::optional<DiagramLayout> arrangement; // how children are laid out (2D diagrams)
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Space, id, type, parent, layout, projection, background, camera, grid, scroll)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Space, id, type, parent, layout, projection, background, camera, grid, scroll, arrangement)
 
 // ═══════════════════════════════════════════════════════════════════
 // Node Types
@@ -122,7 +245,8 @@ enum class NodeType
     Group,
     Table,
     Form,
-    Button
+    Button,
+    Shape
 };
 // Serialize as PascalCase strings to match the TypeScript mirror.
 NLOHMANN_JSON_SERIALIZE_ENUM(NodeType, {
@@ -144,6 +268,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(NodeType, {
     {NodeType::Table,    "Table"},
     {NodeType::Form,     "Form"},
     {NodeType::Button,   "Button"},
+    {NodeType::Shape,    "Shape"},
 })
 
 struct Transform
@@ -223,11 +348,13 @@ struct SceneNode
     nlohmann::json content;                   // type-specific: text, value, series, etc.
     std::optional<DataBinding> data;
     std::optional<NodeSemantic> semantic;
+    std::optional<Encoding> encode;           // visual encoding: metric → channel
+    std::vector<Port> ports;                  // connection points for edge routing
     NodeInteraction interaction;
     NodeStyle style;
     std::vector<SceneNode> children;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SceneNode, id, type, space, transform, orient, layout, geometry, content, data, semantic, interaction, style, children)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SceneNode, id, type, space, transform, orient, layout, geometry, content, data, semantic, encode, ports, interaction, style, children)
 
 // ═══════════════════════════════════════════════════════════════════
 // Relations
@@ -283,6 +410,7 @@ struct SceneDocument
     std::optional<PresentationState> presentation;   // from presentation_state.hpp
     nlohmann::json state;                     // reactive data state
     nlohmann::json data_sources;              // named data sources for bindings
+    std::vector<ScaleDef> scales;             // shared visual scales (metric → channel)
 };
 // Macro-based serialization doesn't handle std::optional fields correctly,
 // so we need explicit to_json/from_json for SceneDocument.
@@ -299,6 +427,7 @@ inline void to_json(nlohmann::json& j, const SceneDocument& doc)
         {"relations",     doc.relations},
         {"state",         doc.state},
         {"data_sources",  doc.data_sources},
+        {"scales",        doc.scales},
     };
     if (doc.presentation.has_value())
         j["presentation"] = doc.presentation.value();
@@ -315,6 +444,8 @@ inline void from_json(const nlohmann::json& j, SceneDocument& doc)
     j.at("relations").get_to(doc.relations);
     j.at("state").get_to(doc.state);
     j.at("data_sources").get_to(doc.data_sources);
+    if (j.contains("scales"))
+        j.at("scales").get_to(doc.scales);
     if (j.contains("presentation") && !j.at("presentation").is_null())
         doc.presentation = j.at("presentation").get<PresentationState>();
 }
