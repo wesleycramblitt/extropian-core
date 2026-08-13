@@ -9,7 +9,9 @@
 // CRITICAL: This is the unified contract. Both C++ SceneCompiler and
 // TypeScript extropian-web-ui consume this format. The AI produces JSON
 // matching these structs. If you change these types, the TypeScript mirror
-// must be updated and shared test fixtures must pass on both sides.
+// (extropian-web-ui/src/types.ts) must be updated to stay aligned. The
+// mirror is hand-kept and aligned by review — there is no shared test
+// fixture harness between the two backends.
 #pragma once
 
 #include <array>
@@ -38,6 +40,15 @@ enum class SpaceType
     World3D,
     Overlay
 };
+// Serialize as lowercase strings to match the TypeScript mirror.
+NLOHMANN_JSON_SERIALIZE_ENUM(SpaceType, {
+    {SpaceType::Screen,      "screen"},
+    {SpaceType::Panel,       "panel"},
+    {SpaceType::Cartesian2D, "cartesian2d"},
+    {SpaceType::Viewport3D,  "viewport3d"},
+    {SpaceType::World3D,     "world3d"},
+    {SpaceType::Overlay,     "overlay"},
+})
 
 struct CameraPose
 {
@@ -80,7 +91,7 @@ struct Space
     SpaceType type;
     std::optional<std::string> parent;       // parent space id, null for screen
     std::optional<SpaceLayout> layout;       // position within parent
-    std::string projection = "orthographic";
+    std::string projection = "orthographic";  // "orthographic" (fixed 2D) | "perspective" (camera 3D)
     std::string background = "#1a1a2e";
     std::optional<Camera> camera;            // viewport3d only
     std::optional<GridHint> grid;            // world3d only
@@ -113,6 +124,27 @@ enum class NodeType
     Form,
     Button
 };
+// Serialize as PascalCase strings to match the TypeScript mirror.
+NLOHMANN_JSON_SERIALIZE_ENUM(NodeType, {
+    {NodeType::Panel,    "Panel"},
+    {NodeType::Text,     "Text"},
+    {NodeType::Equation, "Equation"},
+    {NodeType::Matrix,   "Matrix"},
+    {NodeType::Plot,     "Plot"},
+    {NodeType::Vector,   "Vector"},
+    {NodeType::Curve,    "Curve"},
+    {NodeType::Mesh,     "Mesh"},
+    {NodeType::Volume,   "Volume"},
+    {NodeType::Label,    "Label"},
+    {NodeType::Graph,    "Graph"},
+    {NodeType::Code,     "Code"},
+    {NodeType::Image,    "Image"},
+    {NodeType::Viewport, "Viewport"},
+    {NodeType::Group,    "Group"},
+    {NodeType::Table,    "Table"},
+    {NodeType::Form,     "Form"},
+    {NodeType::Button,   "Button"},
+})
 
 struct Transform
 {
@@ -151,12 +183,12 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DataBinding, bind, path)
 struct NodeSemantic
 {
     std::string role;
-    std::string concept;
+    std::string concept_id;                   // mathematical or domain concept (renamed from 'concept' — C++20 keyword)
     std::string kind;                         // matrix | vector | point | scalar | function | process | constraint
     std::string explanation;
     std::vector<std::string> tags;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(NodeSemantic, role, concept, kind, explanation, tags)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(NodeSemantic, role, concept_id, kind, explanation, tags)
 
 struct NodeInteraction
 {
@@ -171,6 +203,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(NodeInteraction, hover, select, drag, focus, 
 
 struct NodeStyle
 {
+    // Canonical emphasis vocabulary, shared with StyleOverride (presentation_state.hpp).
     std::string emphasis = "default";         // subtle | default | primary | prominent
     float opacity = 1.0f;
     int depth = 0;
@@ -251,6 +284,39 @@ struct SceneDocument
     nlohmann::json state;                     // reactive data state
     nlohmann::json data_sources;              // named data sources for bindings
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SceneDocument, version, topic, spaces, nodes, relations, presentation, state, data_sources)
+// Macro-based serialization doesn't handle std::optional fields correctly,
+// so we need explicit to_json/from_json for SceneDocument.
+// NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE is used for all types above that don't
+// contain std::optional fields.
+
+inline void to_json(nlohmann::json& j, const SceneDocument& doc)
+{
+    j = nlohmann::json{
+        {"version",       doc.version},
+        {"topic",         doc.topic},
+        {"spaces",        doc.spaces},
+        {"nodes",         doc.nodes},
+        {"relations",     doc.relations},
+        {"state",         doc.state},
+        {"data_sources",  doc.data_sources},
+    };
+    if (doc.presentation.has_value())
+        j["presentation"] = doc.presentation.value();
+    else
+        j["presentation"] = nullptr;
+}
+
+inline void from_json(const nlohmann::json& j, SceneDocument& doc)
+{
+    j.at("version").get_to(doc.version);
+    j.at("topic").get_to(doc.topic);
+    j.at("spaces").get_to(doc.spaces);
+    j.at("nodes").get_to(doc.nodes);
+    j.at("relations").get_to(doc.relations);
+    j.at("state").get_to(doc.state);
+    j.at("data_sources").get_to(doc.data_sources);
+    if (j.contains("presentation") && !j.at("presentation").is_null())
+        doc.presentation = j.at("presentation").get<PresentationState>();
+}
 
 } // namespace exd

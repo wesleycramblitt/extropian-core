@@ -17,6 +17,9 @@
 
 #include <nlohmann/json.hpp>
 
+// Enable std::optional<T> serialization in NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE macros
+#include <exd/core/json_optional.hpp>
+
 namespace exd
 {
 
@@ -41,7 +44,10 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(CameraOverride, space, pose)
 
 struct StyleOverride
 {
-    std::string emphasis = "dim";            // primary | dim | highlighted
+    // Same emphasis vocabulary as NodeStyle::emphasis (scene_document.hpp):
+    // "subtle" | "default" | "primary" | "prominent". Runtime overrides default
+    // to "subtle" (dim) and are usually paired with a low opacity.
+    std::string emphasis = "subtle";
     float opacity = 0.15f;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(StyleOverride, emphasis, opacity)

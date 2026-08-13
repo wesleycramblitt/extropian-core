@@ -146,17 +146,33 @@ include/exd/
 │   ├── registry.hpp, view.hpp
 │   ├── command_buffer.hpp
 │   ├── system_graph.hpp, system.hpp
-└── math/            # namespace exd::math
-    ├── vec2.hpp, vec3.hpp, vec4.hpp
-    ├── mat3.hpp, mat4.hpp
-    ├── quat.hpp, bounds.hpp
-    ├── raycast.hpp, color.hpp
+├── math/            # namespace exd::math
+│   ├── vec2.hpp, vec3.hpp, vec4.hpp
+│   ├── mat3.hpp, mat4.hpp
+│   ├── quat.hpp, bounds.hpp
+│   ├── raycast.hpp, color.hpp     # ColorRGB / ColorRGBA
+└── types/           # cross-language schema structs (C++ + TS authority)
+    ├── scene_document.hpp         # SceneDocument, NodeStyle, NodeInteraction
+    ├── presentation_state.hpp     # StyleOverride and friends
+    ├── semantic_document.hpp
+    ├── visual_intent.hpp
+    └── visual_intent_document.hpp
 ```
+
+**Resolved — `emphasis` vocabulary.** Both structs in `types/` now share one
+vocabulary (`"subtle | default | primary | prominent"`):
+- `scene_document.hpp`'s `NodeStyle::emphasis`
+- `presentation_state.hpp`'s `StyleOverride::emphasis` (default `"subtle"`, i.e. dim)
+
+A third vocabulary (`"subtle | moderate | prominent"`) still appears in the AI
+system prompt in `extropian-composer/composer.toml` — map `"moderate"` to
+`"default"`/`"primary"` when generating. `extropian-spatial-ui`'s
+`scene_renderer.cpp` reads only `NodeStyle::emphasis`, which is unaffected.
 
 ## 8. Non-Goals
 
 - No GPU abstraction (extropian-render)
 - No audio abstraction (extropian-voice)
-- No UI components (extropian-ui, desktop-only)
+- No UI components (spatial-ui's `ui` module)
 - No semantic meaning (extropian-composer)
-- No AI orchestration (extropian-conductor)
+- No AI orchestration (extropian-semantic-to-visual/conductor)

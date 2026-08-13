@@ -11,6 +11,7 @@ Zero dependencies beyond C++23 and the standard library. Provides math types, an
 | `exd::math` | Vec2, Vec3, Vec4, Mat3, Mat4, Quat, DualQuat, transforms, Bounds3, Raycast, Color |
 | `exd::ecs` | Entity, Registry, Component concept, ISystem, CommandBuffer, SystemGraph, sparse-set views |
 | `exd::core` | Config, logging, units, allocators, serialization, event bus, plugin loader, WindowState, debug macros |
+| `exd::types` | Cross-language schema structs: `SceneDocument`, `SceneNode`, `Space`, `Relation`, `NodeStyle`, `NodeInteraction`, `PresentationState`, `PatchOp`, `VisualIntent` (JSON-serializable; TS mirror in `extropian-web-ui`) |
 
 ---
 
@@ -506,6 +507,7 @@ Test dependencies are fetched automatically by CMake:
 exd::math    — Vec2-4, Mat3-4, Quat, DualQuat, Bounds3, Raycast, Color
 exd::ecs     — Entity, Registry, Component, ISystem, View, CommandBuffer, SystemGraph
 exd::core    — Config, logging, units, allocator, event bus, serialization, plugin, WindowState
+exd::types   — SceneDocument, SceneNode, Space, Relation, PresentationState, VisualIntent (schema authority)
 ```
 
 Umbrella header: `#include <exd/ext.hpp>` pulls in all public modules.
