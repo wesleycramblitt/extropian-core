@@ -145,9 +145,11 @@ struct DiagramLayout
     std::optional<ChannelSpec> color_by;  // optional channel driving child color
     std::optional<ChannelSpec> lane_by;   // swimlane: channel grouping nodes into lanes
     std::optional<ChannelSpec> time_by;   // timeline: channel positioning nodes on the time axis
+    std::optional<ChannelSpec> start_by;  // timeline (gantt): channel for bar start
+    std::optional<ChannelSpec> end_by;    // timeline (gantt): channel for bar end
     nlohmann::json params;                // per-algorithm: gap, cols, rankdir, orientation, node_width, node_height, padding, ...
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DiagramLayout, algorithm, size_by, color_by, lane_by, time_by, params)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DiagramLayout, algorithm, size_by, color_by, lane_by, time_by, start_by, end_by, params)
 
 // ═══════════════════════════════════════════════════════════════════
 // Space Types
@@ -395,8 +397,9 @@ struct Relation
     RelationStyle style;
     std::optional<RelationLabel> label;
     std::optional<RelationSemantic> semantic;
+    int bundle = 1;                       // number of logical edges this represents (e.g. a warp's 32 lanes)
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Relation, id, source, target, source_port, target_port, style, label, semantic)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Relation, id, source, target, source_port, target_port, style, label, semantic, bundle)
 
 // ═══════════════════════════════════════════════════════════════════
 // Top-Level SceneDocument
