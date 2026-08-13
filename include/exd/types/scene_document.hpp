@@ -246,7 +246,8 @@ enum class NodeType
     Table,
     Form,
     Button,
-    Shape
+    Shape,
+    Legend
 };
 // Serialize as PascalCase strings to match the TypeScript mirror.
 NLOHMANN_JSON_SERIALIZE_ENUM(NodeType, {
@@ -269,6 +270,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(NodeType, {
     {NodeType::Form,     "Form"},
     {NodeType::Button,   "Button"},
     {NodeType::Shape,    "Shape"},
+    {NodeType::Legend,   "Legend"},
 })
 
 struct Transform
