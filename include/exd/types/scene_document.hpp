@@ -354,11 +354,12 @@ struct SceneNode
     std::optional<NodeSemantic> semantic;
     std::optional<Encoding> encode;           // visual encoding: metric → channel
     std::vector<Port> ports;                  // connection points for edge routing
+    std::optional<DiagramLayout> arrangement; // container: lay out children inside this node's bounds
     NodeInteraction interaction;
     NodeStyle style;
     std::vector<SceneNode> children;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SceneNode, id, type, space, transform, orient, layout, geometry, content, data, semantic, encode, ports, interaction, style, children)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SceneNode, id, type, space, transform, orient, layout, geometry, content, data, semantic, encode, ports, arrangement, interaction, style, children)
 
 // ═══════════════════════════════════════════════════════════════════
 // Relations
