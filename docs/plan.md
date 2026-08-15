@@ -104,6 +104,14 @@ GLM-style math with SSE-friendly layout:
 
 ## 5. Types
 
+> **Updated 2026-08 — VisualPlan (Doc 2) added; TS mirror dropped.** The
+> cross-language schema now lives in C++ **only** (`include/exd/types/`). The
+> TypeScript mirror formerly kept in `extropian-web-ui` is deprecated with that
+> repo; the C++ struct is the single authority, and `composer-web` consumes the
+> JSON format through WASM. The AI-facing composition document is the new
+> **`VisualPlan`** (§5.1), which supersedes `VisualIntent`/`VisualIntentDocument`
+> (both now legacy).
+
 ```cpp
 struct Vertex {
     Vec3f position;
@@ -120,6 +128,130 @@ struct MeshData {
     Bounds bounds;
 };
 ```
+
+## 5.1 VisualPlan (Doc 2) — the semantic composition document
+
+> **New in 2026-08.** `VisualPlan` is the AI-facing composition document. It
+> carries **semantics only** — no coordinates, no pixels, no concrete sizes.
+> `extropian-semantic-to-visual`'s `VisualPlanCompiler` resolves it
+> deterministically into a `SceneDocument`. It supersedes `VisualIntent` /
+> `VisualIntentDocument` (both kept, marked `@deprecated`).
+
+The AI decides *what to show and how to emphasize*; the compiler decides *the
+geometry*. Target ratio: **1 VisualPlan instruction → 10–100 scene operations**.
+
+```cpp
+// include/exd/types/visual_plan.hpp
+namespace exd {
+
+enum class Density { Spacious, Standard, Dense, Reference, Poster, Presentation }; // lowercase on wire
+
+struct HeroHint {                          // the single dominant visual
+    std::string ref;                       // entity id
+    std::optional<std::string> form;       // grammar id, e.g. "layer_stack"
+};
+
+struct Section {                           // semantic topology, not pixels
+    std::string id;
+    std::string strategy;                  // L3 grammar id (see visual-grammar.md)
+    std::vector<std::string> entities;     // entity ids to include
+    std::string emphasis = "default";      // subtle | default | primary | prominent
+};
+
+struct Entity {                            // semantic content graph node
+    std::string id;
+    std::string label;
+    std::optional<std::string> kind;       // free-form semantic kind
+    float importance = 0.5f;               // 0..1 → priority engine input
+};
+
+struct RepresentationChoice {              // one entity, multiple encodings
+    std::string kind;                      // grammar id (equation_fragment, grid_stencil, field_curvature, …)
+    std::string role = "primary";          // primary | intuition | physical_effect | reference | …
+};
+
+struct Representation {
+    std::string semanticRef;               // entity id
+    std::vector<RepresentationChoice> representations;
+};
+
+struct PlanRelation {                      // constraint-based, not coordinates
+    std::string kind;                      // connect | right_of | left_of | above | below | inside | flows | causes | …
+    std::string source;
+    std::string target;
+    std::optional<std::string> from_port;  // "east" etc. (for connect)
+    std::optional<std::string> to_port;
+};
+
+struct PlanOverride {                      // controlled deviations — constraints, not coords
+    std::string op;                        // attach | emphasize | deemphasize | …
+    std::string target;
+    std::optional<std::string> visual;     // grammar to attach (attach)
+    std::optional<std::string> position;   // "semantic_near" (attach)
+};
+
+struct PriorityInputs {                    // optional AI inputs → deterministic scoring
+    float relevance = 0.5f;
+    float focus_proximity = 0.5f;
+    float novelty = 0.5f;
+    float dependency_value = 0.5f;
+};
+
+struct VisualPlan {
+    std::string version = "0.1";
+    std::string topic;
+    Density density = Density::Standard;   // → style_profile
+    std::string composition;               // macro strategy id (see visual-grammar.md §8)
+    std::optional<HeroHint> hero;
+    std::vector<Section> sections;
+    std::vector<Entity> entities;
+    std::vector<Representation> representations;
+    std::vector<PlanRelation> relations;
+    std::vector<PlanOverride> overrides;
+    std::optional<PriorityInputs> priority;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(VisualPlan, version, topic, density, composition,
+    hero, sections, entities, representations, relations, overrides, priority)
+
+} // namespace exd
+```
+
+The 22 L3 grammars (`AnnotatedEquation` … `OptimizationLandscape`) and the 10
+macro strategies (`hero_support` … `reference_sheet`) are specified in
+`extropian-semantic-to-visual/compiler/docs/visual-grammar.md` §8/§9.
+
+### 5.2 style_profile — deterministic density resolution
+
+`VisualPlan.density` resolves into a `style_profile` that the `VisualPlanCompiler`
+embeds in the emitted `SceneDocument` (additive optional field), so any renderer
+resolves typography/spacing/geometry consistently without per-node baking:
+
+```cpp
+// include/exd/types/style_profile.hpp
+namespace exd {
+
+struct StyleProfile {
+    std::string density = "standard";      // spacious | standard | dense | reference | poster | presentation
+    float base_font = 14.0f;
+    float caption_font = 10.0f;
+    float panel_gap = 16.0f;
+    float section_gap = 12.0f;
+    float padding = 16.0f;
+    float annotation_gap = 4.0f;
+    float border_width = 1.0f;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(StyleProfile, density, base_font, caption_font,
+    panel_gap, section_gap, padding, annotation_gap, border_width)
+
+} // namespace exd
+```
+
+Semantic style tokens (`semantic.variable`, `semantic.operator`,
+`semantic.parameter`, `semantic.source`, `semantic.input`, `semantic.output`,
+`semantic.warning`, `semantic.selected`, `semantic.reference`) and typography
+roles (`title`, `sectionHeading`, `heroEquation`, `equation`, `body`, `caption`,
+`annotation`, `microLabel`) are resolved by `extropian-spatial-ui`'s style
+resolver against the active profile — never as raw RGB in the document.
 
 ## 6. Platform & Compilation
 
@@ -151,12 +283,14 @@ include/exd/
 │   ├── mat3.hpp, mat4.hpp
 │   ├── quat.hpp, bounds.hpp
 │   ├── raycast.hpp, color.hpp     # ColorRGB / ColorRGBA
-└── types/           # cross-language schema structs (C++ + TS authority)
-    ├── scene_document.hpp         # SceneDocument, NodeStyle, NodeInteraction
-    ├── presentation_state.hpp     # StyleOverride and friends
-    ├── semantic_document.hpp
-    ├── visual_intent.hpp
-    └── visual_intent_document.hpp
+└── types/           # cross-language schema structs (C++ authority — no TS mirror)
+    ├── scene_document.hpp         # SceneDocument (+style_profile, +composition), NodeStyle, NodeInteraction
+    ├── presentation_state.hpp     # StyleOverride, Annotation, AnimationClip, PatchOp
+    ├── semantic_document.hpp      # Doc 1: what concepts exist
+    ├── visual_plan.hpp            # Doc 2: semantic composition (VisualPlan)
+    ├── style_profile.hpp          # density → deterministic spacing/typography metrics
+    ├── visual_intent.hpp          # legacy (deprecated)
+    └── visual_intent_document.hpp # legacy (deprecated)
 ```
 
 **Resolved — `emphasis` vocabulary.** Both structs in `types/` now share one
@@ -168,6 +302,12 @@ A third vocabulary (`"subtle | moderate | prominent"`) still appears in the AI
 system prompt in `extropian-composer/composer.toml` — map `"moderate"` to
 `"default"`/`"primary"` when generating. `extropian-spatial-ui`'s
 `scene_renderer.cpp` reads only `NodeStyle::emphasis`, which is unaffected.
+
+**SceneDocument additions (additive, 2026-08).** `SceneDocument` gains two
+optional fields: `style_profile` (`StyleProfile`, §5.2) and `composition`
+(string, informational macro-strategy id). Everything else is unchanged, so
+existing documents remain valid. There is **no TypeScript mirror** — the JSON
+contract is C++-only; `composer-web` consumes it through WASM.
 
 ## 8. Non-Goals
 

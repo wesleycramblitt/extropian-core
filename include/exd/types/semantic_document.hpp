@@ -2,7 +2,7 @@
 //
 // Part of the 4-document pipeline:
 //   Doc 1: Semantic Document (entities, relations, processes — what exists)
-//   Doc 2: Visual Intent Document (representations, composition — how to explain)
+//   Doc 2: VisualPlan (semantic composition — how to explain)
 //   Doc 3: Scene Document (spaces, nodes, transforms — the unified contract)
 //   Doc 4: Presentation State (runtime focus, annotations, patches)
 //

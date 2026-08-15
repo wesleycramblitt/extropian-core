@@ -2,16 +2,13 @@
 //
 // Part of the 4-document pipeline:
 //   Doc 1: Semantic Document (what exists)
-//   Doc 2: Visual Intent Document (how to communicate)
+//   Doc 2: VisualPlan (semantic composition)
 //   Doc 3: Scene Document (spaces, nodes, transforms) ← THIS IS THE AUTHORITY
 //   Doc 4: Presentation State (runtime focus, annotations)
 //
-// CRITICAL: This is the unified contract. Both C++ SceneCompiler and
-// TypeScript extropian-web-ui consume this format. The AI produces JSON
-// matching these structs. If you change these types, the TypeScript mirror
-// (extropian-web-ui/src/types.ts) must be updated to stay aligned. The
-// mirror is hand-kept and aligned by review — there is no shared test
-// fixture harness between the two backends.
+// CRITICAL: This is the unified contract. The AI produces JSON matching these
+// structs. There is **no TypeScript mirror** — the JSON contract is C++-only;
+// `composer-web` consumes it through WASM.
 #pragma once
 
 #include <array>
@@ -23,6 +20,8 @@
 
 // Pull in PresentationState so SceneDocument can reference it
 #include <exd/types/presentation_state.hpp>
+// Pull in StyleProfile so SceneDocument can carry density resolution (§5.2)
+#include <exd/types/style_profile.hpp>
 
 namespace exd
 {
@@ -417,6 +416,8 @@ struct SceneDocument
     nlohmann::json state;                     // reactive data state
     nlohmann::json data_sources;              // named data sources for bindings
     std::vector<ScaleDef> scales;             // shared visual scales (metric → channel)
+    std::optional<StyleProfile> style_profile; // density → typography/spacing metrics (§5.2, additive)
+    std::optional<std::string> composition;    // informational macro-strategy id (additive)
 };
 // Macro-based serialization doesn't handle std::optional fields correctly,
 // so we need explicit to_json/from_json for SceneDocument.
@@ -439,6 +440,14 @@ inline void to_json(nlohmann::json& j, const SceneDocument& doc)
         j["presentation"] = doc.presentation.value();
     else
         j["presentation"] = nullptr;
+    if (doc.style_profile.has_value())
+        j["style_profile"] = doc.style_profile.value();
+    else
+        j["style_profile"] = nullptr;
+    if (doc.composition.has_value())
+        j["composition"] = doc.composition.value();
+    else
+        j["composition"] = nullptr;
 }
 
 inline void from_json(const nlohmann::json& j, SceneDocument& doc)
@@ -454,6 +463,10 @@ inline void from_json(const nlohmann::json& j, SceneDocument& doc)
         j.at("scales").get_to(doc.scales);
     if (j.contains("presentation") && !j.at("presentation").is_null())
         doc.presentation = j.at("presentation").get<PresentationState>();
+    if (j.contains("style_profile") && !j.at("style_profile").is_null())
+        doc.style_profile = j.at("style_profile").get<StyleProfile>();
+    if (j.contains("composition") && !j.at("composition").is_null())
+        doc.composition = j.at("composition").get<std::string>();
 }
 
 } // namespace exd

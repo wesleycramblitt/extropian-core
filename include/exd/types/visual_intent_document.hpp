@@ -1,8 +1,11 @@
 // Visual Intent Document (Doc 2) — how to communicate concepts.
 //
+// ⚠️ LEGACY / DEPRECATED (2026-08). Superseded by `VisualPlan` (Doc 2, see
+// visual_plan.hpp). Kept for backward compatibility only.
+//
 // Part of the 4-document pipeline:
 //   Doc 1: Semantic Document (what exists)
-//   Doc 2: Visual Intent Document (how to visually communicate it) ← this file
+//   Doc 2: VisualPlan (semantic composition) ← supersedes this file
 //   Doc 3: Scene Document (spaces, nodes, transforms)
 //   Doc 4: Presentation State (runtime focus, annotations)
 #pragma once

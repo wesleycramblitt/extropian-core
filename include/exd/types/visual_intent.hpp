@@ -1,7 +1,12 @@
 // Canonical VisualIntent types — shared by conductor and compiler.
 //
-// This is the single source of truth for the VisualIntent document model.
-// Both the AI conductor and the deterministic compiler operate on these types.
+// ⚠️ LEGACY / DEPRECATED (2026-08). Superseded by `VisualPlan` (Doc 2, see
+// visual_plan.hpp). Kept for backward compatibility only; new consumers should
+// emit/parse `VisualPlan` and let `VisualPlanCompiler` resolve it into a
+// `SceneDocument`.
+//
+// This was the single source of truth for the VisualIntent document model.
+// Both the AI conductor and the deterministic compiler operated on these types.
 //
 // Pipeline:  Conductor (AI) → VisualIntent → Compiler → ECS → Render
 //
