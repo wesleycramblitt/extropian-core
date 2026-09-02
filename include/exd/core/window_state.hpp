@@ -61,12 +61,29 @@ struct WindowState {
     /// Is a mouse button currently held?
     [[nodiscard]] virtual bool mouse_button_down(int button) const = 0;
 
+    // ── Native handles (platform-specific; nullptr when not applicable) ──
+    // Host systems that need raw platform APIs (e.g. the render-side ImGui
+    // host) fetch the underlying handles through these. Desktop SDL3 builds
+    // return SDL_Window* / SDL_GLContext*; web returns nullptr. (Named to
+    // avoid clashing with typed app-level accessors like Window::native_window().)
+
+    /// Native window handle. SDL_Window* on desktop SDL3.
+    [[nodiscard]] virtual void* native_handle() const { return nullptr; }
+
+    /// Native GL context handle. SDL_GLContext on desktop SDL3.
+    [[nodiscard]] virtual void* native_gl_context() const { return nullptr; }
+
     // ── Input state (updated each frame by the platform layer) ──
 
     InputMode   input_mode      = InputMode::FPS;
     const bool* keyboard_state  = nullptr;
     float       mouse_rel_x     = 0.0f;
     float       mouse_rel_y     = 0.0f;
+    /// Absolute cursor position in window pixels, top-left origin (+Y down).
+    /// Filled every frame by the platform layer; used by visible-cursor
+    /// interaction (orbit camera, gizmo hover/pick, 2D editing).
+    float       cursor_x        = 0.0f;
+    float       cursor_y        = 0.0f;
     float       scroll_x        = 0.0f;
     float       scroll_y        = 0.0f;
     bool        grid_visible    = true;
