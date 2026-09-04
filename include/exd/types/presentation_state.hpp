@@ -1,13 +1,7 @@
-// Presentation State (Doc 4) — runtime focus, annotations, patches.
+// Presentation State — runtime focus, annotations, animations, and patches.
 //
-// Part of the 4-document pipeline:
-//   Doc 1: Semantic Document (what exists)
-//   Doc 2: Visual Intent Document (how to communicate)
-//   Doc 3: Scene Document (spaces, nodes, transforms)
-//   Doc 4: Presentation State (runtime focus, annotations, animations) ← this file
-//
-// This is the runtime patch layer. The AI emits PatchDocuments to modify
-// the current presentation without regenerating the full scene.
+// This is runtime UI state for the authored VisualDocument. It modifies the
+// current presentation without changing authored document structure.
 #pragma once
 
 #include <map>
@@ -44,7 +38,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(CameraOverride, space, pose)
 
 struct StyleOverride
 {
-    // Same emphasis vocabulary as NodeStyle::emphasis (scene_document.hpp):
+    // Same emphasis vocabulary as authored VisualDocument styles:
     // "subtle" | "default" | "primary" | "prominent". Runtime overrides default
     // to "subtle" (dim) and are usually paired with a low opacity.
     std::string emphasis = "subtle";

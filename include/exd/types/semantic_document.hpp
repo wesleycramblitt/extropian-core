@@ -1,13 +1,7 @@
-// Semantic Document (Doc 1) — what concepts exist.
+// Semantic Document — concepts, entities, relations, and processes.
 //
-// Part of the 4-document pipeline:
-//   Doc 1: Semantic Document (entities, relations, processes — what exists)
-//   Doc 2: VisualPlan (semantic composition — how to explain)
-//   Doc 3: Scene Document (spaces, nodes, transforms — the unified contract)
-//   Doc 4: Presentation State (runtime focus, annotations, patches)
-//
-// The AI conductor emits all four documents in a single JSON response.
-// This header defines the C++ structs for the Semantic Document layer.
+// This describes semantic source material used to author a VisualDocument.
+// PresentationState holds runtime UI focus, annotations, and patches.
 #pragma once
 
 #include <map>

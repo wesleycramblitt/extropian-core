@@ -59,7 +59,7 @@ struct Mat4 {
         return r;
     }
 
-    [[nodiscard]] static Mat4 look_at(const Vec3f& eye, const Vec3f& center, const Vec3f& up) {
+    [[nodiscard]] static Mat4 look_at(const Vec3f& eye, const Vec3f& center, const Vec3f& up = Vec3f{0.0f,1.0f,0.0f}) {
         Vec3f f = (center - eye).normalized();
         Vec3f s = f.cross(up).normalized();
         Vec3f u = s.cross(f).normalized();

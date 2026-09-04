@@ -2,57 +2,90 @@
 
 #include <exd/ecs/registry.hpp>
 #include <exd/ecs/system.hpp>
-#include <vector>
+
+#include <array>
+#include <cstdint>
 #include <memory>
-#include <string>
-#include <algorithm>
+#include <utility>
+#include <vector>
 
 namespace exd::ecs {
 
-// ────────────────────────────────────────────────────
-//  SystemGraph — owns and runs systems in order
-// ────────────────────────────────────────────────────
+enum class SystemPhase : uint8_t {
+    Input = 0,
+    Structural,
+    Layout,
+    Interaction,
+    Animation,
+    RenderPreparation,
+    Render,
 
-/// Manages a collection of ISystem instances and runs
-/// them each frame. Systems are executed in the order
-/// they are added (first-added = first-run).
+    // Legacy names retained for source compatibility.
+    Simulation = Structural,
+    Presentation = RenderPreparation,
+};
 
+inline constexpr std::array<SystemPhase, 7> system_phase_order{
+    SystemPhase::Input,
+    SystemPhase::Structural,
+    SystemPhase::Layout,
+    SystemPhase::Interaction,
+    SystemPhase::Animation,
+    SystemPhase::RenderPreparation,
+    SystemPhase::Render,
+};
+
+/// Owns and runs systems in fixed phase order. Systems in one phase run in
+/// insertion order.
 class SystemGraph {
 public:
     SystemGraph() = default;
 
-    /// Add a system.  Takes ownership.  Returns index for later access.
-    /// Systems run in the order they are added.
+    /// Backward-compatible add: systems use the Simulation phase.
     template <typename T, typename... Args>
     requires std::derived_from<T, ISystem>
     T& add(Args&&... args) {
+        return add<T>(SystemPhase::Simulation, std::forward<Args>(args)...);
+    }
+
+    template <typename T, typename... Args>
+    requires std::derived_from<T, ISystem>
+    T& add(SystemPhase phase, Args&&... args) {
         auto ptr = std::make_unique<T>(std::forward<Args>(args)...);
         T& ref = *ptr;
-        systems_.push_back(std::move(ptr));
+        systems_.push_back({phase, std::move(ptr), nullptr});
         return ref;
     }
 
-    /// Add a pre-existing system (no ownership).  Caller must keep it alive.
-    void add_ref(ISystem* sys) {
-        refs_.push_back(sys);
+    /// Backward-compatible add_ref: references use the Simulation phase.
+    void add_ref(ISystem* sys) { add_ref(SystemPhase::Simulation, sys); }
+
+    void add_ref(SystemPhase phase, ISystem* sys) {
+        systems_.push_back({phase, nullptr, sys});
     }
 
-    /// Run all systems in order.
     void update(Registry& registry, double dt) {
-        for (auto& s : systems_) s->update(registry, dt);
-        for (auto* s : refs_)     s->update(registry, dt);
+        for (const auto phase : system_phase_order) {
+            for (auto& entry : systems_) {
+                if (entry.phase != phase) continue;
+                if (entry.owned) entry.owned->update(registry, dt);
+                else if (entry.ref) entry.ref->update(registry, dt);
+            }
+        }
     }
 
-    /// Remove all owned systems.
-    void clear() { systems_.clear(); refs_.clear(); }
+    void clear() { systems_.clear(); }
 
-    [[nodiscard]] size_t count() const noexcept {
-        return systems_.size() + refs_.size();
-    }
+    [[nodiscard]] size_t count() const noexcept { return systems_.size(); }
 
 private:
-    std::vector<std::unique_ptr<ISystem>> systems_;
-    std::vector<ISystem*> refs_;
+    struct Entry {
+        SystemPhase phase;
+        std::unique_ptr<ISystem> owned;
+        ISystem* ref;
+    };
+
+    std::vector<Entry> systems_;
 };
 
 } // namespace exd::ecs

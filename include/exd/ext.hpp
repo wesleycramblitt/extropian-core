@@ -6,12 +6,9 @@
 // ── types ──────────────────────────────────────────
 #include <exd/types/semantic_document.hpp>
 #include <exd/types/style_profile.hpp>
-#include <exd/types/visual_plan.hpp>
+#include <exd/types/visual_document.hpp>
+#include <exd/types/visual_document_patch.hpp>
 #include <exd/types/presentation_state.hpp>
-#include <exd/types/scene_document.hpp>
-// legacy (deprecated) — superseded by VisualPlan:
-#include <exd/types/visual_intent.hpp>
-#include <exd/types/visual_intent_document.hpp>
 
 // ── core ───────────────────────────────────────────
 #include <exd/core/namespace.hpp>
@@ -43,3 +40,4 @@
 #include <exd/ecs/view.hpp>
 #include <exd/ecs/system.hpp>
 #include <exd/ecs/system_graph.hpp>
+#include <exd/ecs/hierarchy_index.hpp>

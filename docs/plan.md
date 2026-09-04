@@ -104,13 +104,12 @@ GLM-style math with SSE-friendly layout:
 
 ## 5. Types
 
-> **Updated 2026-08 — VisualPlan (Doc 2) added; TS mirror dropped.** The
-> cross-language schema now lives in C++ **only** (`include/exd/types/`). The
-> TypeScript mirror formerly kept in `extropian-web-ui` is deprecated with that
-> repo; the C++ struct is the single authority, and `composer-web` consumes the
-> JSON format through WASM. The AI-facing composition document is the new
-> **`VisualPlan`** (§5.1), which supersedes `VisualIntent`/`VisualIntentDocument`
-> (both now legacy).
+> **Updated 2026-08 — `VisualDocument` is the authored visual document.**
+> The cross-language schema now lives in C++ **only** (`include/exd/types/`).
+> The TypeScript mirror formerly kept in `extropian-web-ui` is deprecated with
+> that repo; the C++ structs are the single authority, and `composer-web`
+> consumes the JSON format through WASM. `VisualDocument` is the authored
+> document. Resolved scene data and runtime UI state are implementation-owned.
 
 ```cpp
 struct Vertex {
@@ -129,102 +128,22 @@ struct MeshData {
 };
 ```
 
-## 5.1 VisualPlan (Doc 2) — the semantic composition document
+## 5.1 VisualDocument — the authored document
 
-> **New in 2026-08.** `VisualPlan` is the AI-facing composition document. It
-> carries **semantics only** — no coordinates, no pixels, no concrete sizes.
-> `extropian-semantic-to-visual`'s `VisualPlanCompiler` resolves it
-> deterministically into a `SceneDocument`. It supersedes `VisualIntent` /
-> `VisualIntentDocument` (both kept, marked `@deprecated`).
+`VisualDocument` is the authored, declarative visual document. It describes the
+canvas, sections, nodes, relations, data sources, and initial state that make up
+the authored visual artifact. Structural edits use `VisualDocumentPatch`.
 
-The AI decides *what to show and how to emphasize*; the compiler decides *the
-geometry*. Target ratio: **1 VisualPlan instruction → 10–100 scene operations**.
+VisualDocument v1 is deliberately an orthographic 2D authored input contract.
+It contains authored shape, geometry, size constraints, and layout intent only.
+It excludes 3D/world spaces, cameras, perspective, and resolved x/y/z
+transforms; resolved scene data remains implementation-owned rather than being
+materialized into authored data.
 
-```cpp
-// include/exd/types/visual_plan.hpp
-namespace exd {
+### 5.2 style_profile — deterministic renderer metrics
 
-enum class Density { Spacious, Standard, Dense, Reference, Poster, Presentation }; // lowercase on wire
-
-struct HeroHint {                          // the single dominant visual
-    std::string ref;                       // entity id
-    std::optional<std::string> form;       // grammar id, e.g. "layer_stack"
-};
-
-struct Section {                           // semantic topology, not pixels
-    std::string id;
-    std::string strategy;                  // L3 grammar id (see visual-grammar.md)
-    std::vector<std::string> entities;     // entity ids to include
-    std::string emphasis = "default";      // subtle | default | primary | prominent
-};
-
-struct Entity {                            // semantic content graph node
-    std::string id;
-    std::string label;
-    std::optional<std::string> kind;       // free-form semantic kind
-    float importance = 0.5f;               // 0..1 → priority engine input
-};
-
-struct RepresentationChoice {              // one entity, multiple encodings
-    std::string kind;                      // grammar id (equation_fragment, grid_stencil, field_curvature, …)
-    std::string role = "primary";          // primary | intuition | physical_effect | reference | …
-};
-
-struct Representation {
-    std::string semanticRef;               // entity id
-    std::vector<RepresentationChoice> representations;
-};
-
-struct PlanRelation {                      // constraint-based, not coordinates
-    std::string kind;                      // connect | right_of | left_of | above | below | inside | flows | causes | …
-    std::string source;
-    std::string target;
-    std::optional<std::string> from_port;  // "east" etc. (for connect)
-    std::optional<std::string> to_port;
-};
-
-struct PlanOverride {                      // controlled deviations — constraints, not coords
-    std::string op;                        // attach | emphasize | deemphasize | …
-    std::string target;
-    std::optional<std::string> visual;     // grammar to attach (attach)
-    std::optional<std::string> position;   // "semantic_near" (attach)
-};
-
-struct PriorityInputs {                    // optional AI inputs → deterministic scoring
-    float relevance = 0.5f;
-    float focus_proximity = 0.5f;
-    float novelty = 0.5f;
-    float dependency_value = 0.5f;
-};
-
-struct VisualPlan {
-    std::string version = "0.1";
-    std::string topic;
-    Density density = Density::Standard;   // → style_profile
-    std::string composition;               // macro strategy id (see visual-grammar.md §8)
-    std::optional<HeroHint> hero;
-    std::vector<Section> sections;
-    std::vector<Entity> entities;
-    std::vector<Representation> representations;
-    std::vector<PlanRelation> relations;
-    std::vector<PlanOverride> overrides;
-    std::optional<PriorityInputs> priority;
-};
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(VisualPlan, version, topic, density, composition,
-    hero, sections, entities, representations, relations, overrides, priority)
-
-} // namespace exd
-```
-
-The 22 L3 grammars (`AnnotatedEquation` … `OptimizationLandscape`) and the 10
-macro strategies (`hero_support` … `reference_sheet`) are specified in
-`extropian-semantic-to-visual/compiler/docs/visual-grammar.md` §8/§9.
-
-### 5.2 style_profile — deterministic density resolution
-
-`VisualPlan.density` resolves into a `style_profile` that the `VisualPlanCompiler`
-embeds in the emitted `SceneDocument` (additive optional field), so any renderer
-resolves typography/spacing/geometry consistently without per-node baking:
+`StyleProfile` provides deterministic typography and spacing metrics, so
+presentation code can resolve them consistently without per-node baking:
 
 ```cpp
 // include/exd/types/style_profile.hpp
@@ -284,30 +203,20 @@ include/exd/
 │   ├── quat.hpp, bounds.hpp
 │   ├── raycast.hpp, color.hpp     # ColorRGB / ColorRGBA
 └── types/           # cross-language schema structs (C++ authority — no TS mirror)
-    ├── scene_document.hpp         # SceneDocument (+style_profile, +composition), NodeStyle, NodeInteraction
     ├── presentation_state.hpp     # StyleOverride, Annotation, AnimationClip, PatchOp
     ├── semantic_document.hpp      # Doc 1: what concepts exist
-    ├── visual_plan.hpp            # Doc 2: semantic composition (VisualPlan)
-    ├── style_profile.hpp          # density → deterministic spacing/typography metrics
-    ├── visual_intent.hpp          # legacy (deprecated)
-    └── visual_intent_document.hpp # legacy (deprecated)
+    ├── visual_document.hpp        # authored visual document
+    ├── visual_document_patch.hpp  # structural mutations for VisualDocument
+    └── style_profile.hpp           # deterministic renderer spacing/typography metrics
 ```
 
-**Resolved — `emphasis` vocabulary.** Both structs in `types/` now share one
-vocabulary (`"subtle | default | primary | prominent"`):
-- `scene_document.hpp`'s `NodeStyle::emphasis`
-- `presentation_state.hpp`'s `StyleOverride::emphasis` (default `"subtle"`, i.e. dim)
+Authored VisualDocument styles and `StyleOverride::emphasis` share one
+vocabulary (`"subtle | default | primary | prominent"`). Runtime UI overrides
+default to `"subtle"` (i.e. dim).
 
-A third vocabulary (`"subtle | moderate | prominent"`) still appears in the AI
-system prompt in `extropian-composer/composer.toml` — map `"moderate"` to
-`"default"`/`"primary"` when generating. `extropian-spatial-ui`'s
-`scene_renderer.cpp` reads only `NodeStyle::emphasis`, which is unaffected.
-
-**SceneDocument additions (additive, 2026-08).** `SceneDocument` gains two
-optional fields: `style_profile` (`StyleProfile`, §5.2) and `composition`
-(string, informational macro-strategy id). Everything else is unchanged, so
-existing documents remain valid. There is **no TypeScript mirror** — the JSON
-contract is C++-only; `composer-web` consumes it through WASM.
+PresentationState is runtime UI state; resolved scene data and related runtime
+details are implementation-owned. There is **no TypeScript mirror**; the JSON
+contract is C++-only.
 
 ## 8. Non-Goals
 
@@ -315,4 +224,4 @@ contract is C++-only; `composer-web` consumes it through WASM.
 - No audio abstraction (extropian-voice)
 - No UI components (spatial-ui's `ui` module)
 - No semantic meaning (extropian-composer)
-- No AI orchestration (extropian-semantic-to-visual/conductor)
+- AI production is outside core; `VisualDocument` is an input contract

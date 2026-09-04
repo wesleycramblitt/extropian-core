@@ -1,9 +1,7 @@
-// Style Profile — deterministic density resolution (§5.2).
+// Style Profile — deterministic renderer typography and spacing metrics.
 //
-// `VisualPlan.density` resolves into a `StyleProfile` that the
-// `VisualPlanCompiler` embeds in the emitted `SceneDocument` (additive optional
-// field), so any renderer resolves typography/spacing/geometry consistently
-// without per-node baking.
+// A StyleProfile provides deterministic typography and spacing metrics without
+// baking those presentation details into authored document nodes.
 //
 // Semantic style tokens (`semantic.variable`, `semantic.operator`,
 // `semantic.parameter`, `semantic.source`, `semantic.input`, `semantic.output`,
