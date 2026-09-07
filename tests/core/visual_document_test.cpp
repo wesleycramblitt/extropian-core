@@ -150,3 +150,93 @@ TEST_CASE("VisualDocumentPatch serializes structural document mutations")
     CHECK(output.ops[4].value["preset"] == "grid");
     CHECK(output.ops[8].op == "remove_relation");
 }
+
+TEST_CASE("VisualLayout/Placement/Node/Section carry the DOM-like vocabulary")
+{
+    SUBCASE("defaults")
+    {
+        const exd::VisualNode node;
+        const exd::VisualSection section;
+        const exd::VisualLayout layout;
+        const exd::VisualPlacement placement;
+
+        CHECK_FALSE(node.pass_through);
+        CHECK_FALSE(section.pass_through);
+        CHECK_FALSE(layout.weight.has_value());
+        CHECK_FALSE(placement.absolute.has_value());
+    }
+
+    SUBCASE("full document round-trips the new vocabulary")
+    {
+        exd::VisualDocument doc;
+        doc.id = "vocab-doc";
+
+        exd::VisualLayout layout;
+        layout.weight = 2.5f;
+        layout.width = "fill";
+        layout.min_width = "240";
+
+        exd::VisualAbsolutePlacement abs;
+        abs.x = "12%";
+        abs.y = "0.5rem";
+
+        exd::VisualPlacement placement;
+        placement.absolute = abs;
+
+        layout.placement = placement;
+
+        exd::VisualNode node;
+        node.id = "n1";
+        node.layout = layout;
+        node.pass_through = true;
+
+        exd::VisualSection section;
+        section.id = "s1";
+        section.nodes.push_back(node);
+        section.pass_through = true;
+
+        doc.sections.push_back(section);
+
+        const nlohmann::json json = doc;
+        const auto round_trip = json.get<exd::VisualDocument>();
+
+        REQUIRE(round_trip.sections.size() == 1);
+        const auto& s = round_trip.sections[0];
+        REQUIRE(s.nodes.size() == 1);
+        const auto& n = s.nodes[0];
+
+        CHECK(s.pass_through);
+        CHECK(n.pass_through);
+        REQUIRE(n.layout.has_value());
+        REQUIRE(n.layout->weight.has_value());
+        CHECK(n.layout->weight.value() == doctest::Approx(2.5f));
+        CHECK(n.layout->width == "fill");
+        CHECK(n.layout->min_width == "240");
+        REQUIRE(n.layout->placement.has_value());
+        REQUIRE(n.layout->placement->absolute.has_value());
+        CHECK(n.layout->placement->absolute->x == "12%");
+        CHECK(n.layout->placement->absolute->y == "0.5rem");
+    }
+
+    SUBCASE("json key presence")
+    {
+        exd::VisualLayout layout;
+        layout.weight = 1.0f;
+        exd::VisualNode node;
+        node.id = "n";
+        node.layout = layout;
+        node.pass_through = true;
+        exd::VisualSection section;
+        section.id = "s";
+        section.pass_through = true;
+        exd::VisualDocument doc;
+        doc.id = "d";
+        doc.sections.push_back(section);
+        doc.sections[0].nodes.push_back(node);
+
+        const nlohmann::json json = doc;
+        CHECK(json["sections"][0]["pass_through"] == true);
+        CHECK(json["sections"][0]["nodes"][0]["pass_through"] == true);
+        CHECK(json["sections"][0]["nodes"][0]["layout"]["weight"] == 1.0f);
+    }
+}

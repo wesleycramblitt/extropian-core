@@ -43,7 +43,7 @@ std::vector<Entity> Registry::all_entities() const noexcept {
     std::vector<Entity> out;
     for (Entity::id_type id = 0; id < gen_.size(); ++id)
         if (alive_[id])
-            out.push_back({id, gen_[id]});
+            out.push_back({id, gen_[id], names_[id]});
     return out;
 }
 

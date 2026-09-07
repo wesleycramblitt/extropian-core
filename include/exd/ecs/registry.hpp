@@ -47,6 +47,18 @@ public:
     [[nodiscard]] std::vector<Entity> all_entities() const noexcept;
     [[nodiscard]] size_t entity_count() const noexcept;
 
+    // ---- Introspection (debug / inspector UIs) ----
+    /// Entity display name ("" if invalid or unnamed).
+    [[nodiscard]] const std::string& name_of(Entity e) const noexcept;
+
+    /// Invoke `fn(std::type_index)` for every component type currently pooled.
+    template <class Fn>
+    void for_each_component_type(Fn&& fn) const;
+
+    /// Component-type presence + removal by runtime type (type-erased).
+    [[nodiscard]] bool has_type(std::type_index t, Entity e) const;
+    void remove_type(std::type_index t, Entity e);
+
     // ---- Component operations ----
     template <class T, class... Args>
     T& emplace(Entity e, Args&&... args);
@@ -179,6 +191,9 @@ private:
         return *static_cast<Pool<U>*>(it->second.get());
     }
 
+    IPool* pool_by_type(std::type_index t) noexcept;
+    const IPool* pool_by_type(std::type_index t) const noexcept;
+
     std::vector<Entity::gen_type> gen_;
     std::vector<uint8_t> alive_;
     std::vector<Entity::id_type> free_ids_;
@@ -244,6 +259,40 @@ inline const T* Registry::try_get(Entity e) const noexcept {
     if (!valid(e)) return nullptr;
     auto* p = pool_ptr<T>();
     return p ? p->try_get(e.id) : nullptr;
+}
+
+// ====================== Introspection implementations ======================
+
+inline const std::string& Registry::name_of(Entity e) const noexcept {
+    static const std::string kEmpty;
+    if (!valid(e)) return kEmpty;
+    return names_[e.id];
+}
+
+template <class Fn>
+inline void Registry::for_each_component_type(Fn&& fn) const {
+    for (const auto& [t, pool] : pools_) std::invoke(std::forward<Fn>(fn), t);
+}
+
+inline bool Registry::has_type(std::type_index t, Entity e) const {
+    if (!valid(e)) return false;
+    const auto* p = pool_by_type(t);
+    return p && p->has_entity(e.id);
+}
+
+inline void Registry::remove_type(std::type_index t, Entity e) {
+    if (!valid(e)) return;
+    if (auto* p = pool_by_type(t)) p->remove_entity(e.id);
+}
+
+inline Registry::IPool* Registry::pool_by_type(std::type_index t) noexcept {
+    auto it = pools_.find(t);
+    return (it != pools_.end()) ? it->second.get() : nullptr;
+}
+
+inline const Registry::IPool* Registry::pool_by_type(std::type_index t) const noexcept {
+    auto it = pools_.find(t);
+    return (it != pools_.end()) ? it->second.get() : nullptr;
 }
 
 } // namespace exd::ecs

@@ -58,6 +58,10 @@ struct WindowState {
     /// Reset accumulated mouse delta after consuming it.
     virtual void reset_mouse_delta() = 0;
 
+    /// Switch input mode (cursor capture policy). Platform layers override this
+    /// to also toggle the OS cursor; the default only updates the public field.
+    virtual void set_input_mode(InputMode mode) { input_mode = mode; }
+
     /// Is a mouse button currently held?
     [[nodiscard]] virtual bool mouse_button_down(int button) const = 0;
 

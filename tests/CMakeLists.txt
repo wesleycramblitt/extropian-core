@@ -32,6 +32,7 @@ add_executable(test_hash          core/hash_test.cpp)
 add_executable(test_pool          core/pool_test.cpp)
 add_executable(test_fs            core/fs_test.cpp)
 add_executable(test_visual_document core/visual_document_test.cpp)
+add_executable(test_size_spec core/size_spec_test.cpp)
 
 set(TEST_TARGETS
     test_vec2 test_vec3 test_vec4 test_mat3 test_mat4 test_quat test_dquat
@@ -40,6 +41,7 @@ set(TEST_TARGETS
     test_config test_units test_serialization test_allocator test_event
     test_clock test_string_util test_random test_handle test_hash test_pool test_fs
     test_visual_document
+    test_size_spec
 )
 
 foreach(target ${TEST_TARGETS})

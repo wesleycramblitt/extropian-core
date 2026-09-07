@@ -9,6 +9,7 @@
 #include <exd/types/visual_document.hpp>
 #include <exd/types/visual_document_patch.hpp>
 #include <exd/types/presentation_state.hpp>
+#include <exd/types/size_spec.hpp>
 
 // ── core ───────────────────────────────────────────
 #include <exd/core/namespace.hpp>
