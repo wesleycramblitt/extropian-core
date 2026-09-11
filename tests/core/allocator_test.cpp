@@ -41,7 +41,7 @@ TEST_CASE("LinearAllocator alignment") {
 
 TEST_CASE("LinearAllocator reset") {
     LinearAllocator alloc(256);
-    alloc.allocate(64);
+    (void)alloc.allocate(64);
     CHECK(alloc.used() == 64);
 
     alloc.reset();
@@ -54,7 +54,7 @@ TEST_CASE("LinearAllocator reset") {
 
 TEST_CASE("LinearAllocator alignment with existing offset") {
     LinearAllocator alloc(256);
-    alloc.allocate(3); // offset is 3 (align 8 → 8)
+    (void)alloc.allocate(3); // offset is 3 (align 8 → 8)
     void* p = alloc.allocate(4, 16);
     CHECK(p != nullptr);
     // offset after first alloc was at 8 (aligned from 3), then 4 bytes used
@@ -65,8 +65,8 @@ TEST_CASE("LinearAllocator alignment with existing offset") {
 TEST_CASE("LinearAllocator used reports correct usage") {
     LinearAllocator alloc(1024);
     CHECK(alloc.used() == 0);
-    alloc.allocate(128);
+    (void)alloc.allocate(128);
     CHECK(alloc.used() == 128);
-    alloc.allocate(256);
+    (void)alloc.allocate(256);
     CHECK(alloc.used() == 384);
 }

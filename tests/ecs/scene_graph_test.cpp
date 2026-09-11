@@ -48,9 +48,9 @@ TEST_CASE("SceneGraph reparenting moves subtrees") {
     const auto c = registry.create("c");
     const auto d = registry.create("d");
     SceneGraph scene;
-    scene.attach(a, b);
-    scene.attach(b, c);
-    scene.attach(a, d);
+    CHECK(scene.attach(a, b));
+    CHECK(scene.attach(b, c));
+    CHECK(scene.attach(a, d));
     // Move c (with its subtree) under d.
     CHECK(scene.attach(d, c));
     CHECK(scene.parent(c).value() == d);
@@ -66,8 +66,8 @@ TEST_CASE("SceneGraph removal detaches and promotes children to roots") {
     const auto child = registry.create("child");
     const auto grandchild = registry.create("grandchild");
     SceneGraph scene;
-    scene.attach(parent, child);
-    scene.attach(child, grandchild);
+    CHECK(scene.attach(parent, child));
+    CHECK(scene.attach(child, grandchild));
     scene.remove(parent);
     CHECK_FALSE(scene.contains(parent));
     CHECK_FALSE(scene.parent(child).has_value());      // child is now a root
@@ -81,8 +81,8 @@ TEST_CASE("SceneGraph detach makes a node a root, children stay") {
     const auto b = registry.create("b");
     const auto c = registry.create("c");
     SceneGraph scene;
-    scene.attach(a, b);
-    scene.attach(b, c);
+    CHECK(scene.attach(a, b));
+    CHECK(scene.attach(b, c));
     CHECK(scene.detach(b));
     CHECK_FALSE(scene.parent(b).has_value());
     CHECK(scene.parent(c).value() == b);
@@ -97,9 +97,9 @@ TEST_CASE("SceneGraph sibling ordering: attach_at, reorder, move_after") {
     const auto y = registry.create("y");
     const auto z = registry.create("z");
     SceneGraph scene;
-    scene.attach(root, x);
-    scene.attach(root, z);                       // [x, z]
-    scene.attach_at(root, y, 1);                 // [x, y, z]
+    CHECK(scene.attach(root, x));
+    CHECK(scene.attach(root, z));                       // [x, z]
+    CHECK(scene.attach_at(root, y, 1));                 // [x, y, z]
     CHECK(scene.children(root) == std::vector<Entity>{x, y, z});
     CHECK(scene.reorder(z, 0));                  // [z, x, y]
     CHECK(scene.children(root) == std::vector<Entity>{z, x, y});
@@ -118,10 +118,10 @@ TEST_CASE("SceneGraph traversal is depth-first pre-order with depths") {
     const auto a1 = registry.create("a1");
     const auto a2 = registry.create("a2");
     SceneGraph scene;
-    scene.attach(root, a);
-    scene.attach(root, b);
-    scene.attach(a, a1);
-    scene.attach(a, a2);
+    CHECK(scene.attach(root, a));
+    CHECK(scene.attach(root, b));
+    CHECK(scene.attach(a, a1));
+    CHECK(scene.attach(a, a2));
 
     std::vector<std::pair<Entity, size_t>> visited;
     scene.traverse(root, [&](Entity e, size_t depth) {
@@ -142,7 +142,7 @@ TEST_CASE("SceneGraph traversal is depth-first pre-order with depths") {
 
     // traverse_all covers every root.
     const auto other = registry.create("other");
-    scene.attach(other, registry.create("other-child"));
+    CHECK(scene.attach(other, registry.create("other-child")));
     size_t all = 0;
     scene.traverse_all([&](Entity, size_t) { ++all; return true; });
     CHECK(all == 7);
@@ -153,7 +153,7 @@ TEST_CASE("SceneGraph is generation safe and prunes destroyed entities") {
     const auto old_parent = registry.create("old");
     const auto child = registry.create("child");
     SceneGraph scene;
-    scene.attach(old_parent, child);
+    CHECK(scene.attach(old_parent, child));
     registry.destroy(old_parent);
     CHECK(scene.prune(registry) == 1);
     CHECK_FALSE(scene.parent(child).has_value());
@@ -172,7 +172,7 @@ TEST_CASE("SceneGraph clear empties the graph") {
     const auto a = registry.create("a");
     const auto b = registry.create("b");
     SceneGraph scene;
-    scene.attach(a, b);
+    CHECK(scene.attach(a, b));
     scene.clear();
     CHECK(scene.size() == 0);
     CHECK(scene.roots().empty());

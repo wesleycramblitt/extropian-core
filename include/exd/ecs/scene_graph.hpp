@@ -69,7 +69,7 @@ public:
         const auto it = nodes_.find(entity);
         if (it == nodes_.end()) return;
         if (it->second.parent) detach_from_parent(*it->second.parent, entity);
-        for (const auto child : it->second.children) {
+        for (const auto& child : it->second.children) {
             if (const auto child_it = nodes_.find(child); child_it != nodes_.end())
                 child_it->second.parent.reset();
         }
@@ -85,7 +85,7 @@ public:
         stale.reserve(nodes_.size());
         for (const auto& [entity, _] : nodes_)
             if (!registry.valid(entity)) stale.push_back(entity);
-        for (const auto entity : stale) remove(entity);
+        for (const auto& entity : stale) remove(entity);
         return stale.size();
     }
 

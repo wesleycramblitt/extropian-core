@@ -32,7 +32,7 @@ TEST_CASE("TransformSystem: nested hierarchy accumulates TRS") {
     // Parent: translate +5 on X, scale 2. Child: local translate +1 on Y.
     registry.emplace<LocalTransform>(parent, Vec3f{5, 0, 0}, Quat{1, 0, 0, 0}, Vec3f{2, 2, 2});
     registry.emplace<LocalTransform>(child, Vec3f{0, 1, 0}, Quat{1, 0, 0, 0}, Vec3f{1, 1, 1});
-    scene.attach(parent, child);
+    CHECK(scene.attach(parent, child));
 
     const auto world = TransformSystem::derive(registry, scene, child);
     // Parent scale 2 applies to child's local offset: (5 + 2*0, 0 + 2*1, 0)
@@ -50,7 +50,7 @@ TEST_CASE("TransformSystem: rotation composes through hierarchy") {
     const Quat rot_z90{0.70710678f, 0, 0, 0.70710678f};
     registry.emplace<LocalTransform>(parent, Vec3f{0, 0, 0}, rot_z90, Vec3f{1, 1, 1});
     registry.emplace<LocalTransform>(child, Vec3f{1, 0, 0}, Quat{1, 0, 0, 0}, Vec3f{1, 1, 1});
-    scene.attach(parent, child);
+    CHECK(scene.attach(parent, child));
 
     const auto world = TransformSystem::derive(registry, scene, child);
     CHECK(std::abs(world.position.x) < 1e-4f);
@@ -67,8 +67,8 @@ TEST_CASE("TransformSystem: three-level chain") {
     registry.emplace<LocalTransform>(g, Vec3f{1, 0, 0}, Quat{1, 0, 0, 0}, Vec3f{1, 1, 1});
     registry.emplace<LocalTransform>(p, Vec3f{2, 0, 0}, Quat{1, 0, 0, 0}, Vec3f{1, 1, 1});
     registry.emplace<LocalTransform>(c, Vec3f{4, 0, 0}, Quat{1, 0, 0, 0}, Vec3f{1, 1, 1});
-    scene.attach(g, p);
-    scene.attach(p, c);
+    CHECK(scene.attach(g, p));
+    CHECK(scene.attach(p, c));
     const auto world = TransformSystem::derive(registry, scene, c);
     CHECK(world.position == Vec3f{7, 0, 0});
 }
@@ -82,9 +82,9 @@ TEST_CASE("TransformSystem: reparenting changes derived transform") {
     registry.emplace<LocalTransform>(a, Vec3f{10, 0, 0}, Quat{1, 0, 0, 0}, Vec3f{1, 1, 1});
     registry.emplace<LocalTransform>(b, Vec3f{0, 0, 0}, Quat{1, 0, 0, 0}, Vec3f{1, 1, 1});
     registry.emplace<LocalTransform>(c, Vec3f{1, 0, 0}, Quat{1, 0, 0, 0}, Vec3f{1, 1, 1});
-    scene.attach(a, c);
+    CHECK(scene.attach(a, c));
     CHECK(TransformSystem::derive(registry, scene, c).position == Vec3f{11, 0, 0});
-    scene.attach(b, c);  // reparent
+    CHECK(scene.attach(b, c));  // reparent
     CHECK(TransformSystem::derive(registry, scene, c).position == Vec3f{1, 0, 0});
 }
 
@@ -114,7 +114,7 @@ TEST_CASE("TransformSystem: stale parent treated as root") {
     const auto child = registry.create("child");
     registry.emplace<LocalTransform>(parent, Vec3f{5, 0, 0}, Quat{1, 0, 0, 0}, Vec3f{1, 1, 1});
     registry.emplace<LocalTransform>(child, Vec3f{1, 0, 0}, Quat{1, 0, 0, 0}, Vec3f{1, 1, 1});
-    scene.attach(parent, child);
+    CHECK(scene.attach(parent, child));
     CHECK(TransformSystem::derive(registry, scene, child).position == Vec3f{6, 0, 0});
     registry.destroy(parent);
     scene.prune(registry);
@@ -128,9 +128,9 @@ TEST_CASE("TransformSystem: cycle guard") {
     const auto b = registry.create("b");
     registry.emplace<LocalTransform>(a, Vec3f{1, 0, 0}, Quat{1, 0, 0, 0}, Vec3f{1, 1, 1});
     registry.emplace<LocalTransform>(b, Vec3f{2, 0, 0}, Quat{1, 0, 0, 0}, Vec3f{1, 1, 1});
-    scene.attach(a, b);
+    CHECK(scene.attach(a, b));
     // Force a malformed cycle by bypassing attach() validation.
-    scene.attach(b, a);  // rejected... verify chain stays valid
+    CHECK_FALSE(scene.attach(b, a));  // rejected... verify chain stays valid
     CHECK(scene.parent(a) == std::nullopt);
     const auto world = TransformSystem::derive(registry, scene, a);
     CHECK(world.position == Vec3f{1, 0, 0});  // terminates
