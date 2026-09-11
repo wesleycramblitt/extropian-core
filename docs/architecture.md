@@ -159,19 +159,13 @@ carries widget meaning, `RenderableComponent`/`Material` carry draw meaning.
 
 ## 8. Remaining debt / deviations
 
-- **extropian-composer** (external consumer repo) still references the deleted
-  `DocumentLoader`; it is broken against the new spatial-ui and needs a
-  port to the widget-builder model. Out of workspace — flagged, not changed.
 - **extropian-synthesis** does not exist in the workspace (referenced by
   older docs); no action taken.
 - **extropian-app** `EventState` test failure is pre-existing (edge-triggered
   mouse buttons made level-held); unrelated to this refactor, left as-is.
-- **UV-lattice generators** (sphere, ellipsoid, capsule, helix) are
-  orientation-correct but not position-welded; `closed_manifold_gate` on them
-  is out of scope for this refactor (documented in geometry winding_test).
-- **extropian-geometry `build/`** has `BUILD_TESTS=OFF` with stale test
-  binaries; the authoritative test build is `build-test/` (BUILD_TESTS=ON).
-- Spatial-ui legacy planning docs (`implementation-plan.md`,
-  `design-*.md`, `capability-navigation.md`) still describe the old
-  document model; kept as history, superseded by the rewritten
-  `docs/architecture.md`.
+- **Helix open tube** (`capped=false`) is intentionally not a closed solid
+  (open annulus ends) and correctly fails `closed_manifold_gate`; documented
+  in geometry winding_test.
+- **extropian-composer** (ported 2026-09-11 to the widget-builder model,
+  `018ff18`) still has no AI/semantic-to-visual pipeline; the widget builders
+  are the only authoring surface (documented in its `docs/plan.md` section 7).
