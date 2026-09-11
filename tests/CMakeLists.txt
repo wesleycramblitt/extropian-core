@@ -17,6 +17,8 @@ add_executable(test_registry       ecs/registry_test.cpp)
 add_executable(test_command_buffer ecs/command_buffer_test.cpp)
 add_executable(test_system_graph   ecs/system_graph_test.cpp)
 add_executable(test_hierarchy_index ecs/hierarchy_index_test.cpp)
+add_executable(test_scene_graph     ecs/scene_graph_test.cpp)
+add_executable(test_transform_system ecs/transform_system_test.cpp)
 
 # ── Core tests ──
 add_executable(test_config        core/config_test.cpp)
@@ -38,6 +40,7 @@ set(TEST_TARGETS
     test_vec2 test_vec3 test_vec4 test_mat3 test_mat4 test_quat test_dquat
     test_raycast test_color test_bounds
     test_component test_entity test_registry test_command_buffer test_system_graph test_hierarchy_index
+    test_scene_graph test_transform_system
     test_config test_units test_serialization test_allocator test_event
     test_clock test_string_util test_random test_handle test_hash test_pool test_fs
     test_visual_document

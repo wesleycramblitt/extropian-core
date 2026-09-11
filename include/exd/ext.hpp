@@ -42,3 +42,6 @@
 #include <exd/ecs/system.hpp>
 #include <exd/ecs/system_graph.hpp>
 #include <exd/ecs/hierarchy_index.hpp>
+#include <exd/ecs/scene_graph.hpp>
+#include <exd/ecs/transform.hpp>
+#include <exd/ecs/transform_system.hpp>

@@ -19,6 +19,7 @@ FetchContent_MakeAvailable(nlohmann_json)
 add_library(exd-core STATIC
     # ECS
     src/ecs/registry.cpp
+    src/ecs/transform_system.cpp
 
     # Foundation
     src/core/assert.cpp

@@ -14,6 +14,14 @@ Core answers:
 Core owns:
 
 - ECS: `Registry`, `Entity`, `View<Cs...>`, `CommandBuffer`, `SystemGraph`, `ISystem`
+- **SceneGraph**: `exd::ecs::SceneGraph` — the shared, generic hierarchy over
+  entities (parent/child, traversal, reparenting, sibling ordering, lifetime).
+  It knows nothing about transforms, rendering, or domain semantics; spatial
+  systems combine it with `LocalTransform` components to derive world state.
+  Supersedes the former `HierarchyIndex` (kept as a deprecated alias).
+- **Transforms**: `exd::ecs::LocalTransform` (component state, relative to
+  parent) and `exd::ecs::WorldTransform` (derived/consumed state),
+  computed by `exd::ecs::TransformSystem` from SceneGraph + LocalTransform.
 - Math: `Vec2`, `Vec3`, `Vec4`, `Mat3`, `Mat4`, `Quat`, `DualQuat`, `Bounds3`, `Raycast`, `Color`
 - Types: `Handle<T>`, `Vertex`, `PrimitiveTopology`, `MeshData`, `Bounds`
 - Utilities: `Signal<T>`, logging, assertions, hash, pool, random, clock, serialization, units
@@ -225,3 +233,31 @@ contract is C++-only.
 - No UI components (spatial-ui's `ui` module)
 - No semantic meaning (extropian-composer)
 - AI production is outside core; `VisualDocument` is an input contract
+
+
+## 8. SceneGraph & Transform model (ecosystem architecture)
+
+The ecosystem converges on one model: **entities and components are the
+common state; SceneGraph is the common hierarchy; transforms are component
+state + derived state**.
+
+- `SceneGraph` (`exd/ecs/scene_graph.hpp`) — a pure containment structure.
+  Answers only "what is the hierarchical relationship between these
+  entities?". It supports attach/detach/reparent, ordered siblings
+  (`attach_at`, `reorder`, `move_after`), DFS traversal with early abort,
+  root/depth queries, and generation-safe lifetime handling (`prune()`).
+  It does not know about rendering, UI, layout, cameras, geometry, physics,
+  or transforms — it is equally useful for spatial trees, CAE part trees,
+  and UI widget trees.
+- `LocalTransform` (`exd/ecs/transform.hpp`) — an entity's transform
+  relative to its parent. Plain component state; no hierarchy semantics.
+- `WorldTransform` — derived state: the accumulated local→world transform.
+  Written by `TransformSystem` (`exd/ecs/transform_system.hpp`) each update
+  from SceneGraph relationships + LocalTransform (TRS accumulation,
+  cycle-guarded, generation-safe). Renderers and picking systems consume
+  `WorldTransform`; they do not reimplement parent-chain composition.
+- Hierarchy and transform are *orthogonal*: a SceneGraph can organize
+  non-spatial trees, and entities can carry LocalTransform without a parent.
+- The former `HierarchyIndex` is a deprecated alias of `SceneGraph`;
+  renderer-local hierarchy (`render::Parent`/`Children`) is the legacy path
+  being migrated onto SceneGraph + WorldTransform.
