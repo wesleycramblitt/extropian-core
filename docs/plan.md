@@ -18,7 +18,6 @@ Core owns:
   entities (parent/child, traversal, reparenting, sibling ordering, lifetime).
   It knows nothing about transforms, rendering, or domain semantics; spatial
   systems combine it with `LocalTransform` components to derive world state.
-  Supersedes the former `HierarchyIndex` (kept as a deprecated alias).
 - **Transforms**: `exd::ecs::LocalTransform` (component state, relative to
   parent) and `exd::ecs::WorldTransform` (derived/consumed state),
   computed by `exd::ecs::TransformSystem` from SceneGraph + LocalTransform.
@@ -258,6 +257,6 @@ state + derived state**.
   `WorldTransform`; they do not reimplement parent-chain composition.
 - Hierarchy and transform are *orthogonal*: a SceneGraph can organize
   non-spatial trees, and entities can carry LocalTransform without a parent.
-- The former `HierarchyIndex` is a deprecated alias of `SceneGraph`;
-  renderer-local hierarchy (`render::Parent`/`Children`) is the legacy path
-  being migrated onto SceneGraph + WorldTransform.
+- `HierarchyIndex` and renderer-local hierarchy components
+  (`render::Parent`/`Children`) were removed; SceneGraph + WorldTransform
+  is the only hierarchy/transform model.

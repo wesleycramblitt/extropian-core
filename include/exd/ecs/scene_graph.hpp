@@ -54,12 +54,6 @@ public:
         return true;
     }
 
-    /// @deprecated compatibility alias for attach(parent, child).
-    [[nodiscard]] bool set_parent(Entity child, Entity parent) { return attach(parent, child); }
-
-    /// @deprecated compatibility alias for detach(child).
-    [[nodiscard]] bool clear_parent(Entity child) { return detach(child); }
-
     // ── removal ────────────────────────────────────────────────────────
     /// Remove `child` from its parent; it becomes a root of the graph.
     [[nodiscard]] bool detach(Entity child) {
@@ -174,7 +168,6 @@ public:
         if (anchor == siblings.end()) return false;
         const auto cur = std::find(siblings.begin(), siblings.end(), child);
         if (cur == siblings.end()) return false;
-        const size_t anchor_index = static_cast<size_t>(anchor - siblings.begin());
         if (cur == anchor || cur == anchor + 1) return true;
         siblings.erase(cur);
         const auto re_anchor = std::find(siblings.begin(), siblings.end(), after_sibling);
