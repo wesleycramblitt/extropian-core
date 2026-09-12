@@ -44,7 +44,7 @@ public:
 
         reference operator*() const {
             const auto id = (*ids_)[i_];
-            return Entity{id, (*reg_).gen_[id]};
+            return Entity{id, (*reg_).gen_[id], {}};
         }
 
         iterator& operator++() { ++i_; satisfy(); return *this; }
@@ -65,7 +65,7 @@ public:
             if (!reg_ || !driving_ || !ids_) return;
             while (i_ < ids_->size()) {
                 const auto id = (*ids_)[i_];
-                Entity e{id, (*reg_).gen_[id]};
+                Entity e{id, (*reg_).gen_[id], {}};
                 if (!(*reg_).alive_.empty() && id < (*reg_).alive_.size() && !(*reg_).alive_[id]) { ++i_; continue; }
                 if (!(*reg_).valid(e)) { ++i_; continue; }
                 if (!((*reg_).template has<std::remove_const_t<Cs>>(e) && ...)) { ++i_; continue; }
