@@ -34,7 +34,7 @@ All five repos pass their suites (see §7).
 | Hierarchy | `render::HierarchySystem` (Parent/Children/SiblingLink) + `HierarchyIndex` (core) + CAE's own implicit trees | `ecs::SceneGraph` (core) — the only hierarchy, everywhere |
 | Transforms | `render::Transform`, CAE mesh-side poses, `ecs::Transform` | `ecs::LocalTransform` (component) + `ecs::WorldTransform` (derived) |
 | UI runtime | `VisualDocument` → `DocumentLoader` → Document* components → style resolver → render_queue/view_sync → ~14 systems | Pure ECS: `WidgetComponent` + `WidgetBuilder` → dirty-tagged resolution systems |
-| 2D vs 3D | separate 2D document scene + 3D world | one SceneGraph; "2D" = ortho camera + camera-fixed widgets |
+| 2D vs 3D | separate 2D document scene + 3D world | one SceneGraph; one camera; "2D" = per-pass ortho overlay (UiOverlayComponent canvas) + screen-pinned widgets |
 | CAE scene | flat entity layout, render::Transform | optional `SceneGraph*` param: `"model.<name>"` root parents all parts/markers |
 | Pick/interaction | render-owned state machines + UI-owned | render owns raw hit production only; spatial-ui owns semantics + pick-ID assignment |
 
