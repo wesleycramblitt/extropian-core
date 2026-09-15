@@ -51,6 +51,10 @@ public:
     /// Entity display name ("" if invalid or unnamed).
     [[nodiscard]] const std::string& name_of(Entity e) const noexcept;
 
+    /// Rename an existing entity (author-time tooling: schema builders,
+    /// debuggers). No-op for invalid entities.
+    void set_name(Entity e, std::string name);
+
     /// Invoke `fn(std::type_index)` for every component type currently pooled.
     template <class Fn>
     void for_each_component_type(Fn&& fn) const;
@@ -267,6 +271,11 @@ inline const std::string& Registry::name_of(Entity e) const noexcept {
     static const std::string kEmpty;
     if (!valid(e)) return kEmpty;
     return names_[e.id];
+}
+
+inline void Registry::set_name(Entity e, std::string name) {
+    if (!valid(e)) return;
+    names_[e.id] = std::move(name);
 }
 
 template <class Fn>
