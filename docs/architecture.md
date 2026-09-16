@@ -83,7 +83,8 @@ carries widget meaning, `RenderableComponent`/`Material` carry draw meaning.
   (LocalTransform fallback); `make_camera` takes `ecs::LocalTransform`;
   camera selection, `CameraModeSystem`, `Gizmo3DSystem`, `PickerSystem`,
   `InteractionSystem` migrated; `ecs_inspector` registers both transform
-  components.
+  components (ecs_inspector itself was later removed with the ImGui
+  retirement; the spatial-ui inspector reads the same components).
 - Docs updated (plan.md systems table, camera-collision execution order,
   render-architecture, spatial-ui-integration).
 - 87/88 tests (the 1 failure is the pre-existing unrelated extropian-app

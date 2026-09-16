@@ -66,7 +66,7 @@ struct WindowState {
     [[nodiscard]] virtual bool mouse_button_down(int button) const = 0;
 
     // ── Native handles (platform-specific; nullptr when not applicable) ──
-    // Host systems that need raw platform APIs (e.g. the render-side ImGui
+    // Host systems that need raw platform APIs (e.g. the render-side UI
     // host) fetch the underlying handles through these. Desktop SDL3 builds
     // return SDL_Window* / SDL_GLContext*; web returns nullptr. (Named to
     // avoid clashing with typed app-level accessors like Window::native_window().)
