@@ -15,7 +15,11 @@ struct Vertex {
     math::Vec3f normal   = {0, 1, 0};
     math::Vec3f uv       = {};
     math::Quat  tangent  = {1, 0, 0, 1};
-    math::Quat  color    = {0.8f, 0.8f, 0.8f, 1.0f};
+    // White = identity: shaders multiply v_color by the material color, so a
+    // mesh that carries no per-vertex color must default to white (1,1,1,1).
+    // The old 0.8 gray default silently darkened every mesh that never set
+    // color (all CAE importers, e.g. OBJ/FBX/STL/STEP) by 20%.
+    math::Quat  color    = {1.0f, 1.0f, 1.0f, 1.0f};
 };
 
 // ── Topology ─────────────────────────────────────
