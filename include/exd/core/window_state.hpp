@@ -23,9 +23,8 @@ enum class InputMode {
 };
 
 enum class CursorMode {
-    Normal   = 0,  ///< Visible, not captured
-    Hidden   = 1,  ///< Invisible but free to move
-    Captured = 2   ///< Hidden + locked to window (for FPS camera)
+    Normal   = 0,  ///< Visible, not captured (select mouse)
+    Captured = 1   ///< Hidden + locked to window (relative mouse, FPS camera)
 };
 
 /// Platform-agnostic window lifecycle events.
@@ -91,7 +90,7 @@ struct WindowState {
 
     // ── Input state (updated each frame by the platform layer) ──
 
-    InputMode   input_mode      = InputMode::FPS;
+    InputMode   input_mode      = InputMode::UI;   // select mouse by default; apps toggle FPS (relative) explicitly
     const bool* keyboard_state  = nullptr;
     float       mouse_rel_x     = 0.0f;
     float       mouse_rel_y     = 0.0f;
