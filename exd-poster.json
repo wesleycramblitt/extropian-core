@@ -1,0 +1,890 @@
+{
+  "type": "exd-poster",
+  "version": "1",
+  "id": "extropian-core",
+  "metadata": {
+    "title": "Extropian Core",
+    "subtitle": "The zero-dependency foundation of the Extropian ecosystem — 46 headers across four modules: core utilities, a pure sparse-set ECS with a shared SceneGraph, header-first math, and the document contracts everything renders.",
+    "badge": "C++23 \u00b7 4 modules \u00b7 4.4k LOC",
+    "tags": [
+      "c++",
+      "ecs",
+      "architecture",
+      "library",
+      "header-only"
+    ]
+  },
+  "theme": "dark-neon",
+  "density": "dense",
+  "hero": {
+    "metrics": [
+      {
+        "label": "modules",
+        "value": "4"
+      },
+      {
+        "label": "headers",
+        "value": "46"
+      },
+      {
+        "label": "loc",
+        "value": "4.4k"
+      },
+      {
+        "label": "test suites",
+        "value": "31"
+      }
+    ]
+  },
+  "sections": [
+    {
+      "id": "core-infra",
+      "title": "core/ \u2014 infrastructure",
+      "subtitle": "Self-contained exd::core utilities: allocators, pools, handles, hashing, logging, config, serialization, fs, and shared mesh contracts",
+      "accent": "#6ee7a0",
+      "nodes": [
+        {
+          "id": "allocator",
+          "label": "LinearAllocator",
+          "kind": "lib",
+          "meta": {
+            "loc": "40"
+          },
+          "desc": "Bump allocator for per-frame scratch: 8-byte aligned by default, returns nullptr on overflow instead of throwing."
+        },
+        {
+          "id": "pool",
+          "label": "Pool",
+          "kind": "lib",
+          "meta": {
+            "loc": "76"
+          },
+          "desc": "Pool<T> fixed-size slot allocator with an O(1) free-list; the ECS stores each component type in one."
+        },
+        {
+          "id": "handle",
+          "label": "Handle",
+          "kind": "data",
+          "meta": {
+            "loc": "36"
+          },
+          "desc": "Handle<T> generational handles \u2014 stable indices carrying version tags for safe reuse."
+        },
+        {
+          "id": "hash",
+          "label": "Hash",
+          "kind": "lib",
+          "meta": {
+            "loc": "67"
+          },
+          "desc": "FNV-style hashing used for ids, string keys, and config lookups across the platform."
+        },
+        {
+          "id": "logging",
+          "label": "Logging",
+          "kind": "lib",
+          "meta": {
+            "loc": "17"
+          },
+          "desc": "Thread-safe printf-style logging; Debug/Info/Warn go to stdout and Error to stderr."
+        },
+        {
+          "id": "config",
+          "label": "Config",
+          "kind": "data",
+          "meta": {
+            "loc": "43"
+          },
+          "desc": "Key-value Config store with typed get_or<T> access and TOML load/save."
+        },
+        {
+          "id": "serialization",
+          "label": "Serialization",
+          "kind": "lib",
+          "meta": {
+            "loc": "29"
+          },
+          "desc": "Binary blob pack/unpack helpers plus json_escape; write/read_binary_file bridge to the fs layer."
+        },
+        {
+          "id": "fs",
+          "label": "FS",
+          "kind": "lib",
+          "meta": {
+            "loc": "84"
+          },
+          "desc": "Thin std::filesystem wrappers: file existence, read/write, directory listing, path helpers."
+        },
+        {
+          "id": "mesh-types",
+          "label": "MeshTypes",
+          "kind": "data",
+          "meta": {
+            "loc": "50"
+          },
+          "desc": "Vertex, PrimitiveTopology, MeshData, and Bounds contracts shared by the whole rendering stack."
+        },
+        {
+          "id": "math-g",
+          "label": "math",
+          "kind": "module",
+          "desc": null,
+          "ext": true
+        },
+        {
+          "id": "ecs-g",
+          "label": "ecs",
+          "kind": "module",
+          "desc": null,
+          "ext": true
+        }
+      ],
+      "relations": [
+        {
+          "from": "mesh-types",
+          "to": "math-g",
+          "kind": "depends"
+        },
+        {
+          "from": "serialization",
+          "to": "fs",
+          "kind": "uses"
+        },
+        {
+          "from": "config",
+          "to": "fs",
+          "kind": "uses"
+        },
+        {
+          "from": "ecs-g",
+          "to": "pool",
+          "kind": "uses"
+        }
+      ]
+    },
+    {
+      "id": "ecs",
+      "title": "ecs/ \u2014 the entity component system",
+      "subtitle": "Pure sparse-set ECS: Registry owns component pools, views iterate, SceneGraph + TransformSystem derive world state",
+      "accent": "#63b8ff",
+      "nodes": [
+        {
+          "id": "entity",
+          "label": "Entity",
+          "kind": "data",
+          "meta": {
+            "loc": "31"
+          },
+          "desc": "Entity handle: id plus generation counter and optional name; equality compares id and gen only."
+        },
+        {
+          "id": "component",
+          "label": "Component",
+          "kind": "data",
+          "meta": {
+            "loc": "31"
+          },
+          "desc": "Component concept requiring trivially movable and destructible types; ComponentTraits assigns each type a runtime id."
+        },
+        {
+          "id": "registry",
+          "label": "Registry",
+          "kind": "class",
+          "meta": {
+            "loc": "307"
+          },
+          "desc": "Sparse-set Registry: entity create/destroy, one type-erased Pool per component, typed view() queries.",
+          "drill": "ecs-detail"
+        },
+        {
+          "id": "view",
+          "label": "View",
+          "kind": "class",
+          "meta": {
+            "loc": "138"
+          },
+          "desc": "View<Cs...> iterates the smallest matching pool and filters the rest, with an .each() callback form."
+        },
+        {
+          "id": "command-buffer",
+          "label": "CommandBuffer",
+          "kind": "class",
+          "meta": {
+            "loc": "71"
+          },
+          "desc": "Deferred create/destroy/emplace mutations queued during iteration and applied at a sync point."
+        },
+        {
+          "id": "system-graph",
+          "label": "SystemGraph",
+          "kind": "class",
+          "meta": {
+            "loc": "156"
+          },
+          "desc": "Phase-ordered execution of ISystem implementations over the Registry; TransformSystem runs in the Structural phase."
+        },
+        {
+          "id": "scene-graph",
+          "label": "SceneGraph",
+          "kind": "class",
+          "meta": {
+            "loc": "231"
+          },
+          "desc": "Generic parent-child containment with no semantics: attach/detach/reparent, DFS traversal, generation-safe prune.",
+          "drill": "scene-graph-detail"
+        },
+        {
+          "id": "transform",
+          "label": "Transform",
+          "kind": "data",
+          "meta": {
+            "loc": "33"
+          },
+          "desc": "LocalTransform (authored TRS component) and WorldTransform (derived) \u2014 the shared transform model, math-backed."
+        },
+        {
+          "id": "transform-system",
+          "label": "TransformSystem",
+          "kind": "function",
+          "meta": {
+            "loc": "44"
+          },
+          "desc": "Derives WorldTransform from SceneGraph relationships plus LocalTransform each update, cycle-guarded."
+        },
+        {
+          "id": "math-g",
+          "label": "math",
+          "kind": "module",
+          "desc": null,
+          "ext": true
+        },
+        {
+          "id": "core-g",
+          "label": "core",
+          "kind": "module",
+          "desc": null,
+          "ext": true
+        }
+      ],
+      "relations": [
+        {
+          "from": "registry",
+          "to": "entity",
+          "kind": "depends"
+        },
+        {
+          "from": "view",
+          "to": "registry",
+          "kind": "uses"
+        },
+        {
+          "from": "command-buffer",
+          "to": "registry",
+          "kind": "uses"
+        },
+        {
+          "from": "system-graph",
+          "to": "registry",
+          "kind": "uses"
+        },
+        {
+          "from": "scene-graph",
+          "to": "entity",
+          "kind": "uses"
+        },
+        {
+          "from": "scene-graph",
+          "to": "registry",
+          "kind": "uses"
+        },
+        {
+          "from": "transform",
+          "to": "math-g",
+          "kind": "depends"
+        },
+        {
+          "from": "transform-system",
+          "to": "scene-graph",
+          "kind": "uses"
+        },
+        {
+          "from": "transform-system",
+          "to": "transform",
+          "kind": "depends"
+        },
+        {
+          "from": "registry",
+          "to": "core-g",
+          "kind": "uses"
+        }
+      ]
+    },
+    {
+      "id": "math",
+      "title": "math/ \u2014 vector & transform math",
+      "subtitle": "Header-only, SSE-friendly exd::math \u2014 vectors, matrices, quaternions, dual quaternions, bounds, raycast (plus Color and an umbrella math.hpp)",
+      "accent": "#c792ea",
+      "nodes": [
+        {
+          "id": "vec2",
+          "label": "Vec2",
+          "kind": "class",
+          "meta": {
+            "loc": "64"
+          },
+          "desc": "Vec2<T>: 2D vector with a scalar (wedge) cross product and up/right helpers for UV and UI math."
+        },
+        {
+          "id": "vec3",
+          "label": "Vec3",
+          "kind": "class",
+          "meta": {
+            "loc": "68"
+          },
+          "desc": "Vec3<T>: the platform workhorse \u2014 dot/cross, length, normalize, and axis constants like forward() (negative Z)."
+        },
+        {
+          "id": "vec4",
+          "label": "Vec4",
+          "kind": "class",
+          "meta": {
+            "loc": "65"
+          },
+          "desc": "Vec4<T>: homogeneous coordinates and colors, with xyz() access to the first three components."
+        },
+        {
+          "id": "mat3",
+          "label": "Mat3",
+          "kind": "class",
+          "meta": {
+            "loc": "124"
+          },
+          "desc": "Mat3 column-major 3\u00d73: from_axis_angle, from_scale, inverse, and mul_vec for linear transforms."
+        },
+        {
+          "id": "mat4",
+          "label": "Mat4",
+          "kind": "class",
+          "meta": {
+            "loc": "141"
+          },
+          "desc": "Mat4 4\u00d74: perspective, look_at, TRS model matrices, and P\u00b7V\u00b7M composition."
+        },
+        {
+          "id": "quat",
+          "label": "Quat",
+          "kind": "class",
+          "meta": {
+            "loc": "104"
+          },
+          "desc": "Quat rotation quaternions: from_axis_angle, from_rotation_matrix, and vector rotation via operator*."
+        },
+        {
+          "id": "dual-quat",
+          "label": "DualQuat",
+          "kind": "class",
+          "meta": {
+            "loc": "148"
+          },
+          "desc": "DualQuat rigid transforms: from_pose, decompose, to_mat4, and scLERP interpolation for skeletal animation."
+        },
+        {
+          "id": "bounds",
+          "label": "Bounds3",
+          "kind": "class",
+          "meta": {
+            "loc": "94"
+          },
+          "desc": "Bounds3<T> AABB with min/max and containment queries used for culling and picking."
+        },
+        {
+          "id": "raycast",
+          "label": "Raycast",
+          "kind": "function",
+          "meta": {
+            "loc": "151"
+          },
+          "desc": "Ray type plus M\u00f6ller\u2013Trumbore triangle, plane, sphere, and slab-method AABB intersection queries."
+        }
+      ],
+      "relations": [
+        {
+          "from": "mat3",
+          "to": "vec3",
+          "kind": "uses"
+        },
+        {
+          "from": "mat4",
+          "to": "vec3",
+          "kind": "uses"
+        },
+        {
+          "from": "mat4",
+          "to": "quat",
+          "kind": "uses"
+        },
+        {
+          "from": "quat",
+          "to": "vec3",
+          "kind": "uses"
+        },
+        {
+          "from": "dual-quat",
+          "to": "quat",
+          "kind": "depends"
+        },
+        {
+          "from": "dual-quat",
+          "to": "vec3",
+          "kind": "uses"
+        },
+        {
+          "from": "bounds",
+          "to": "vec3",
+          "kind": "uses"
+        },
+        {
+          "from": "raycast",
+          "to": "vec3",
+          "kind": "uses"
+        }
+      ]
+    },
+    {
+      "id": "types",
+      "title": "types/ \u2014 the document contracts",
+      "subtitle": "The C++-only JSON schema: authored VisualDocument, semantic input, patches, sizing, style, and runtime presentation state",
+      "accent": "#ffd166",
+      "nodes": [
+        {
+          "id": "visual-document",
+          "label": "VisualDocument",
+          "kind": "data",
+          "meta": {
+            "loc": "427"
+          },
+          "desc": "Authored 2D contract: metadata, canvas, sections, nodes, relations, data sources, and initial state \u2014 no resolved transforms.",
+          "drill": "visual-document-detail"
+        },
+        {
+          "id": "semantic-document",
+          "label": "SemanticDocument",
+          "kind": "data",
+          "meta": {
+            "loc": "77"
+          },
+          "desc": "SemanticDocument: the concept-level input describing what exists, grounded by nodes' concept ids."
+        },
+        {
+          "id": "patch",
+          "label": "Patch",
+          "kind": "data",
+          "meta": {
+            "loc": "30"
+          },
+          "desc": "VisualDocumentPatch: incremental structural mutations to the authored VisualDocument."
+        },
+        {
+          "id": "size-spec",
+          "label": "SizeSpec",
+          "kind": "data",
+          "meta": {
+            "loc": "16"
+          },
+          "desc": "SizeSpec tokens (auto/fill/\u003cn\u003e/\u003cn\u003e%/\u003cn\u003erem) resolved by layout consumers via exd::parse_size_spec."
+        },
+        {
+          "id": "style-profile",
+          "label": "StyleProfile",
+          "kind": "data",
+          "meta": {
+            "loc": "38"
+          },
+          "desc": "StyleProfile: deterministic typography and spacing metrics so renderers resolve them without per-node baking."
+        },
+        {
+          "id": "presentation-state",
+          "label": "PresentationState",
+          "kind": "data",
+          "meta": {
+            "loc": "102"
+          },
+          "desc": "PresentationState: runtime UI state \u2014 StyleOverride, Annotation, AnimationClip, and PatchOp."
+        },
+        {
+          "id": "core-g",
+          "label": "core",
+          "kind": "module",
+          "desc": null,
+          "ext": true
+        }
+      ],
+      "relations": [
+        {
+          "from": "visual-document",
+          "to": "semantic-document",
+          "kind": "depends"
+        },
+        {
+          "from": "semantic-document",
+          "to": "visual-document",
+          "kind": "uses"
+        },
+        {
+          "from": "patch",
+          "to": "visual-document",
+          "kind": "depends"
+        },
+        {
+          "from": "size-spec",
+          "to": "visual-document",
+          "kind": "uses"
+        },
+        {
+          "from": "style-profile",
+          "to": "visual-document",
+          "kind": "uses"
+        },
+        {
+          "from": "visual-document",
+          "to": "core-g",
+          "kind": "uses"
+        },
+        {
+          "from": "presentation-state",
+          "to": "core-g",
+          "kind": "uses"
+        }
+      ]
+    }
+  ],
+  "drilldowns": {
+    "ecs-detail": {
+      "title": "Inside the Registry",
+      "subtitle": "Sparse-set storage, views, deferred mutations, and the ordered execution loop",
+      "accent": "#63b8ff",
+      "nodes": [
+        {
+          "id": "entity-storage",
+          "label": "EntityStorage",
+          "kind": "class",
+          "meta": {
+            "loc": "60"
+          },
+          "desc": "Sparse set of alive entities with a free-list and generation counters for safe id reuse."
+        },
+        {
+          "id": "component-storage",
+          "label": "ComponentStorage",
+          "kind": "class",
+          "meta": {
+            "loc": "90"
+          },
+          "desc": "Type-erased core::Pool<T> per component type, keyed by ComponentTraits runtime id."
+        },
+        {
+          "id": "view2",
+          "label": "View",
+          "kind": "class",
+          "meta": {
+            "loc": "80"
+          },
+          "desc": "Typed iteration over the smallest pool with filtering of the other matching sets."
+        },
+        {
+          "id": "command-buffer2",
+          "label": "CommandBuffer",
+          "kind": "class",
+          "meta": {
+            "loc": "70"
+          },
+          "desc": "Queues create/destroy/emplace operations while views are being iterated."
+        },
+        {
+          "id": "sync-point",
+          "label": "SyncPoint",
+          "kind": "function",
+          "meta": {
+            "loc": "30"
+          },
+          "desc": "Applies buffered mutations to the registry at the sync boundary between passes."
+        },
+        {
+          "id": "system-pass",
+          "label": "SystemPass",
+          "kind": "function",
+          "meta": {
+            "loc": "40"
+          },
+          "desc": "One execution slot running ISystem::update(Registry&, dt) in graph order."
+        },
+        {
+          "id": "mode-gating",
+          "label": "ModeGating",
+          "kind": "data",
+          "meta": {
+            "loc": "15"
+          },
+          "desc": "ISystem::active_modes() lets systems declare which runtime modes gate their update."
+        }
+      ],
+      "relations": [
+        {
+          "from": "component-storage",
+          "to": "entity-storage",
+          "kind": "uses"
+        },
+        {
+          "from": "view2",
+          "to": "component-storage",
+          "kind": "uses"
+        },
+        {
+          "from": "view2",
+          "to": "entity-storage",
+          "kind": "uses"
+        },
+        {
+          "from": "command-buffer2",
+          "to": "component-storage",
+          "kind": "uses"
+        },
+        {
+          "from": "sync-point",
+          "to": "command-buffer2",
+          "kind": "uses"
+        },
+        {
+          "from": "sync-point",
+          "to": "component-storage",
+          "kind": "uses"
+        },
+        {
+          "from": "system-pass",
+          "to": "view2",
+          "kind": "uses"
+        },
+        {
+          "from": "system-pass",
+          "to": "sync-point",
+          "kind": "calls"
+        }
+      ]
+    },
+    "scene-graph-detail": {
+      "title": "SceneGraph + TransformSystem",
+      "subtitle": "A pure containment tree feeding derived world transforms",
+      "accent": "#63b8ff",
+      "nodes": [
+        {
+          "id": "attach",
+          "label": "Attach",
+          "kind": "function",
+          "meta": {
+            "loc": "40"
+          },
+          "desc": "attach/attach_at wire parent-child edges with ordered sibling placement."
+        },
+        {
+          "id": "detach",
+          "label": "Detach",
+          "kind": "function",
+          "meta": {
+            "loc": "50"
+          },
+          "desc": "detach/remove/reparent/reorder/move_after mutate the containment structure."
+        },
+        {
+          "id": "traverse",
+          "label": "Traverse",
+          "kind": "function",
+          "meta": {
+            "loc": "40"
+          },
+          "desc": "Depth-first traversal with early abort, plus roots(), depth(), and traverse_all."
+        },
+        {
+          "id": "prune",
+          "label": "Prune",
+          "kind": "function",
+          "meta": {
+            "loc": "20"
+          },
+          "desc": "Generation-safe prune of stale entities against the registry."
+        },
+        {
+          "id": "local-transform",
+          "label": "LocalTransform",
+          "kind": "data",
+          "meta": {
+            "loc": "15"
+          },
+          "desc": "Authored TRS component relative to the parent; plain component state with no hierarchy semantics."
+        },
+        {
+          "id": "world-transform",
+          "label": "WorldTransform",
+          "kind": "data",
+          "meta": {
+            "loc": "10"
+          },
+          "desc": "Derived accumulated local\u2192world transform written by TransformSystem."
+        },
+        {
+          "id": "transform-system2",
+          "label": "TransformSystem",
+          "kind": "function",
+          "meta": {
+            "loc": "44"
+          },
+          "desc": "Accumulates TRS down the graph each update, cycle-guarded and generation-safe."
+        }
+      ],
+      "relations": [
+        {
+          "from": "traverse",
+          "to": "attach",
+          "kind": "uses"
+        },
+        {
+          "from": "prune",
+          "to": "detach",
+          "kind": "uses"
+        },
+        {
+          "from": "transform-system2",
+          "to": "traverse",
+          "kind": "uses"
+        },
+        {
+          "from": "transform-system2",
+          "to": "local-transform",
+          "kind": "uses"
+        },
+        {
+          "from": "transform-system2",
+          "to": "world-transform",
+          "kind": "owns"
+        },
+        {
+          "from": "world-transform",
+          "to": "local-transform",
+          "kind": "depends"
+        }
+      ]
+    },
+    "visual-document-detail": {
+      "title": "Inside VisualDocument",
+      "subtitle": "The authored 2D contract: sections, nodes, relations, layout, and data in one picture",
+      "accent": "#ffd166",
+      "nodes": [
+        {
+          "id": "document",
+          "label": "Document",
+          "kind": "data",
+          "meta": {
+            "loc": "20"
+          },
+          "desc": "Root struct: version, id, metadata, canvas, density, composition, sections, nodes, relations, and data sources."
+        },
+        {
+          "id": "canvas",
+          "label": "Canvas",
+          "kind": "data",
+          "meta": {
+            "loc": "10"
+          },
+          "desc": "VisualCanvas: optional size, unit, aspect ratio, background, and grid resolution."
+        },
+        {
+          "id": "section",
+          "label": "Section",
+          "kind": "data",
+          "meta": {
+            "loc": "15"
+          },
+          "desc": "VisualSection: recursive named subtree with its own layout, nodes, and child sections."
+        },
+        {
+          "id": "node",
+          "label": "Node",
+          "kind": "data",
+          "meta": {
+            "loc": "25"
+          },
+          "desc": "VisualNode: kind, label, layout, content, shape, chart, binding, ports, and children."
+        },
+        {
+          "id": "layout",
+          "label": "Layout",
+          "kind": "data",
+          "meta": {
+            "loc": "20"
+          },
+          "desc": "VisualLayout: presets stack/row/grid/split/overlay/flow plus constraints and explicit placement."
+        },
+        {
+          "id": "relation",
+          "label": "Relation",
+          "kind": "data",
+          "meta": {
+            "loc": "15"
+          },
+          "desc": "VisualRelation: directed source\u2192target edge with optional ports, label, and style."
+        },
+        {
+          "id": "data-source",
+          "label": "DataSource",
+          "kind": "data",
+          "meta": {
+            "loc": "10"
+          },
+          "desc": "DataSource feeds bindings: inline values, URIs, queries, or generated content."
+        }
+      ],
+      "relations": [
+        {
+          "from": "document",
+          "to": "canvas",
+          "kind": "owns"
+        },
+        {
+          "from": "document",
+          "to": "section",
+          "kind": "owns"
+        },
+        {
+          "from": "section",
+          "to": "node",
+          "kind": "owns"
+        },
+        {
+          "from": "section",
+          "to": "section",
+          "kind": "owns"
+        },
+        {
+          "from": "node",
+          "to": "layout",
+          "kind": "owns"
+        },
+        {
+          "from": "node",
+          "to": "node",
+          "kind": "owns"
+        },
+        {
+          "from": "relation",
+          "to": "node",
+          "kind": "uses"
+        },
+        {
+          "from": "document",
+          "to": "data-source",
+          "kind": "owns"
+        }
+      ]
+    }
+  },
+  "layout": "16:9"
+}
