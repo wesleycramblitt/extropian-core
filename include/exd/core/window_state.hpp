@@ -46,8 +46,20 @@ struct WindowEvents {
 struct WindowState {
     virtual ~WindowState() = default;
 
-    /// Retrieve window dimensions (pixels) and aspect ratio.
+    /// Retrieve window LOGICAL dimensions (pixels) and aspect ratio.
     virtual void get_dimensions(int& w, int& h, float& aspect) const = 0;
+
+    /// Retrieve the GL framebuffer/drawable size in device pixels. Equal to
+    /// the logical size when content scale is 1; LARGER on HiDPI displays /
+    /// WSLg with display scaling. Renderers must use this for glViewport and
+    /// scissor math (device pixels), while the UI canvas and input mapping
+    /// stay in logical units.
+    virtual void get_drawable_size(int& w, int& h) const {
+        int dummy = 0;
+        float aspect = 1.0f;
+        get_dimensions(w, h, aspect);
+        (void)dummy;
+    }
 
     /// Was a key pressed this frame? (scancode, not keycode)
     [[nodiscard]] virtual bool was_key_pressed(int scancode) const = 0;
