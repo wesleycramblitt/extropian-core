@@ -129,11 +129,11 @@ TEST_CASE("SceneGraph traversal is depth-first pre-order with depths") {
         return true;
     });
     REQUIRE(visited.size() == 5);
-    CHECK(visited[0] == std::make_pair(root, 0u));
-    CHECK(visited[1] == std::make_pair(a, 1u));
-    CHECK(visited[2] == std::make_pair(a1, 2u));
-    CHECK(visited[3] == std::make_pair(a2, 2u));
-    CHECK(visited[4] == std::make_pair(b, 1u));
+    CHECK(visited[0] == std::make_pair(root, size_t{0}));
+    CHECK(visited[1] == std::make_pair(a, size_t{1}));
+    CHECK(visited[2] == std::make_pair(a1, size_t{2}));
+    CHECK(visited[3] == std::make_pair(a2, size_t{2}));
+    CHECK(visited[4] == std::make_pair(b, size_t{1}));
 
     // Early abort.
     size_t calls = 0;
